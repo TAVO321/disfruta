@@ -10,12 +10,9 @@ const pages = import.meta.glob('./pages/**/*.jsx', { eager: true })
 createInertiaApp({
   title: (titulo) => (titulo ? `${titulo} · DISFRUTA` : 'DISFRUTA'),
 
-  resolve: (name) =>
-    resolvePageComponent(
-      `./pages/${name}.jsx`,
-      pages[`./pages/${name}.jsx`],
-      null,
-    ),
+  // laravel-vite-plugin v3 recibe el mapa completo de paginas y resuelve
+  // solo; la firma vieja (path, page, default) hacia pages[path] y fallaba.
+  resolve: (name) => resolvePageComponent(`./pages/${name}.jsx`, pages),
 
   setup({ el, App, props }) {
     // El layout se resuelve en cada navegacion (no una sola vez al cargar):
