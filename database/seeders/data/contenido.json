@@ -1,0 +1,154 @@
+{
+  "categorias": [
+    "encurtidos",
+    "escabechos",
+    "picantes",
+    "ajos",
+    "combos"
+  ],
+  "promociones": [
+    {
+      "id": "pr-oferta-uchu",
+      "titulo": "Oferta · Uchus en Escabeche",
+      "descripcion": "Picante redondo con precio especial. Aprovechando el próximo lote: encargá el tuyo y lo tenés fresco en dos semanas.",
+      "tipo": "oferta",
+      "descuento": 15,
+      "productosIds": [
+        "p-uchu-escabeche"
+      ],
+      "activa": true,
+      "vigente": "2026-10-15"
+    },
+    {
+      "id": "pr-combo-parrillada",
+      "titulo": "Combo Parrillera · Ahorro Bs 25",
+      "descripcion": "Cebolla morada, jalapeños y escabeche para pique macho. Todo lo que necesitás para arrancar la parrilla bien.",
+      "tipo": "combo",
+      "descuento": 18,
+      "productosIds": [
+        "p-combo-parrillada"
+      ],
+      "activa": true,
+      "vigente": "2026-12-31"
+    },
+    {
+      "id": "pr-temporada-habanero",
+      "titulo": "Temporada · Habanero Ahumado",
+      "descripcion": "Edición limitada elaborada con habaneros de huerta. Poca producción, sabor muy nuestro.",
+      "tipo": "temporada",
+      "descuento": 0,
+      "productosIds": [
+        "p-picante-habanero"
+      ],
+      "activa": true,
+      "vigente": "2026-11-30"
+    },
+    {
+      "id": "pr-limitado-pepino",
+      "titulo": "Últimos frascos · Pepinos con Mostaza",
+      "descripcion": "Quedan 3 frascos del lote de julio. Cuando terminen, la producción se reinicia en octubre.",
+      "tipo": "limitado",
+      "descuento": 10,
+      "productosIds": [
+        "p-pepino-queso"
+      ],
+      "activa": true,
+      "vigente": "2026-10-05"
+    },
+    {
+      "id": "pr-pimienta-pique",
+      "titulo": "Oferta · Escabeche para Pique Macho",
+      "descripcion": "Escabeche de ají colorado, cebolla morada y morrón asado. El condimento que estaba faltando en tu asado.",
+      "tipo": "oferta",
+      "descuento": 12,
+      "productosIds": [
+        "p-pique-macho"
+      ],
+      "activa": true,
+      "vigente": "2026-10-31"
+    }
+  ],
+  "resenas": [
+    {
+      "id": "r-1",
+      "productoId": "p-cebolla-morada",
+      "autor": "Valentina R.",
+      "estrellas": 5,
+      "texto": "La cebolla va tremenda con la parrilla. Se nota que es casera de verdad, nada de sabor raro como los industrializados.",
+      "fecha": "2026-09-18"
+    },
+    {
+      "id": "r-2",
+      "productoId": "p-cebolla-morada",
+      "autor": "Marcos G.",
+      "estrellas": 5,
+      "texto": "Le pongo a todas las hamburguesas que hago. La textura es increíble, sigue crocante.",
+      "fecha": "2026-09-11"
+    },
+    {
+      "id": "r-3",
+      "productoId": "p-jalapeno-escabeche",
+      "autor": "Sofía A.",
+      "estrellas": 4,
+      "texto": "Excelente escabeche, tiene buen picor. Lo usé para unos tacos y quedaron bárbaros.",
+      "fecha": "2026-09-14"
+    },
+    {
+      "id": "r-4",
+      "productoId": "p-uchu-escabeche",
+      "autor": "Damián L.",
+      "estrellas": 5,
+      "texto": "Ojo que pica en serio. Si te gusta el picante, este es el que tenés que llevar a la parrilla.",
+      "fecha": "2026-09-06"
+    },
+    {
+      "id": "r-5",
+      "productoId": "p-combo-parrillada",
+      "autor": "Familia Torres",
+      "estrellas": 5,
+      "texto": "Compramos el combo para el asado del domingo y fue un éxito. Se nos terminó en dos horas.",
+      "fecha": "2026-09-20"
+    },
+    {
+      "id": "r-6",
+      "productoId": "p-relish-tomate",
+      "autor": "Laura M.",
+      "estrellas": 5,
+      "texto": "El relish cambió mis hamburguesas. Sabor a casero, te juro.",
+      "fecha": "2026-09-09"
+    },
+    {
+      "id": "r-7",
+      "productoId": "p-ajo-encurtido",
+      "autor": "Andrés P.",
+      "estrellas": 4,
+      "texto": "Muy bueno, tierno y sin picar. Ideal para la carne asada.",
+      "fecha": "2026-08-30"
+    },
+    {
+      "id": "r-8",
+      "productoId": "p-picante-habanero",
+      "autor": "Carla B.",
+      "estrellas": 5,
+      "texto": "De lo mejor que probé. La edición limitada vale la pena.",
+      "fecha": "2026-09-21"
+    },
+    {
+      "id": "r-9",
+      "productoId": "p-pique-macho",
+      "autor": "Nico V.",
+      "estrellas": 5,
+      "texto": "Justo lo que buscaba para el pique. El morrón asado le da una vuelta tremenda.",
+      "fecha": "2026-09-15"
+    },
+    {
+      "id": "r-10",
+      "productoId": "p-pepino-queso",
+      "autor": "Rocío S.",
+      "estrellas": 4,
+      "texto": "Los pepinos de siempre, muy buenos. Ojalá hagan más seguido.",
+      "fecha": "2026-08-25"
+    }
+  ],
+  "lotes": 14
+}
