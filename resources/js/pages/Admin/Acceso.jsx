@@ -3,7 +3,7 @@ import { IconoWhatsapp } from '@/components/Iconos'
 import { MARCA } from '@/lib/config'
 
 export default function Acceso() {
-  const { post, processing, errors } = useForm({
+  const { data, setData, post, processing, errors } = useForm({
     email: '',
     password: '',
     remember: false,
@@ -34,8 +34,8 @@ export default function Acceso() {
             <Campo label="Email">
               <input
                 type="email"
-                value={post('email')}
-                onChange={(e) => post('email', e.target.value)}
+                value={data.email}
+                onChange={(e) => setData('email', e.target.value)}
                 autoComplete="username"
                 autoFocus
                 required
@@ -47,8 +47,8 @@ export default function Acceso() {
             <Campo label="Contraseña">
               <input
                 type="password"
-                value={post('password')}
-                onChange={(e) => post('password', e.target.value)}
+                value={data.password}
+                onChange={(e) => setData('password', e.target.value)}
                 autoComplete="current-password"
                 required
                 className="w-full rounded-lg border border-crema-profundo bg-crema px-3.5 py-2.5 text-sm text-tinta focus:border-verde-claro"
@@ -59,8 +59,8 @@ export default function Acceso() {
             <label className="flex cursor-pointer items-center gap-2 text-sm text-tinta-suave">
               <input
                 type="checkbox"
-                checked={post('remember')}
-                onChange={(e) => post('remember', e.target.checked)}
+                checked={data.remember}
+                onChange={(e) => setData('remember', e.target.checked)}
                 className="h-4 w-4 accent-verde"
               />
               Recordarme en este equipo

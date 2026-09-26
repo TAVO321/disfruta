@@ -400,7 +400,7 @@ function TarjetaMini({ producto, indice }) {
 }
 
 function Resenas({ producto, resenas, promedio }) {
-  const { post, processing, errors, reset, wasSuccessful } = useForm({
+  const { data, setData, post, processing, errors, reset, wasSuccessful } = useForm({
     autor: '',
     estrellas: 5,
     texto: '',
@@ -430,14 +430,14 @@ function Resenas({ producto, resenas, promedio }) {
             <button
               key={i}
               type="button"
-              onClick={() => post('estrellas', i)}
+              onClick={() => setData('estrellas', i)}
               aria-label={`${i} estrellas`}
             >
               <IconoEstrella
-                llena={i <= post('estrellas', 0)}
+                llena={i <= data.estrellas}
                 width={20}
                 height={20}
-                className={i <= post('estrellas', 0) ? 'text-dorado' : 'text-crema-profundo'}
+                className={i <= data.estrellas ? 'text-dorado' : 'text-crema-profundo'}
               />
             </button>
           ))}
@@ -445,14 +445,14 @@ function Resenas({ producto, resenas, promedio }) {
 
         <input
           type="text"
-          value={post('autor')}
-          onChange={(e) => post('autor', e.target.value)}
+          value={data.autor}
+          onChange={(e) => setData('autor', e.target.value)}
           placeholder="Tu nombre"
           className="mb-2 w-full rounded-lg border border-crema-profundo bg-crema px-3 py-2 text-sm"
         />
         <textarea
-          value={post('texto')}
-          onChange={(e) => post('texto', e.target.value)}
+          value={data.texto}
+          onChange={(e) => setData('texto', e.target.value)}
           rows={3}
           placeholder="¿Cómo te fue con este acompañamiento?"
           className="w-full resize-none rounded-lg border border-crema-profundo bg-crema px-3 py-2 text-sm"
@@ -461,8 +461,8 @@ function Resenas({ producto, resenas, promedio }) {
         <input
           type="text"
           name="sitio_web"
-          value={post('sitio_web')}
-          onChange={(e) => post('sitio_web', e.target.value)}
+          value={data.sitio_web}
+          onChange={(e) => setData('sitio_web', e.target.value)}
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"

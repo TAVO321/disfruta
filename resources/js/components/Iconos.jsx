@@ -25,7 +25,7 @@ export const IconoUsuario = (p) => (
   </svg>
 )
 
-export const IconoCorazon = ({  }) => (
+export const IconoCorazon = ({ lleno, ...p }) => (
   <svg
     {...base(p)}
     fill={lleno ? 'currentColor' : 'none'}
@@ -35,7 +35,7 @@ export const IconoCorazon = ({  }) => (
   </svg>
 )
 
-export const IconoEstrella = ({  }) => (
+export const IconoEstrella = ({ llena, ...p }) => (
   <svg {...base(p)} fill={llena ? 'currentColor' : 'none'} strokeWidth={llena ? 0 : 1.5}>
     <path d="m12 3.2 2.7 5.5 6 .9-4.35 4.24 1.03 6-5.38-2.83L6.62 19.84l1.03-6L3.3 9.6l6-.9L12 3.2Z" />
   </svg>
