@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Categoria;
-use App\Models\Producto;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeder para produccion. A diferencia de DatabaseSeeder no trae los pedidos de
- * ejemplo, y es idempotente: se puede correr en cada deploy sin duplicar nada.
+ * Seeder de produccion: deja la base con lo minimo indispensable para que el
+ * sitio funcione, y nada de contenido de ejemplo.
  *
- * - El admin y los ajustes se refrescan siempre (updateOrCreate).
- * - El catalogo solo se carga si la base esta vacia, porque CatalogoSeeder usa
- *   create() y correrlo dos veces duplicaria productos, lotes y promociones.
+ * - AdminUserSeeder y AjustesSeeder usan updateOrCreate, asi que son idempotentes
+ *   y se pueden correr en cada deploy sin duplicar nada.
+ * - NO se carga CatalogoSeeder a proposito: los productos, lotes, promociones y
+ *   resenas se cargan a mano desde el panel de administracion.
+ * - NO se carga PedidosDemoSeeder: en produccion no hay pedidos falsos.
  */
 class ProductionSeeder extends Seeder
 {
@@ -20,13 +20,5 @@ class ProductionSeeder extends Seeder
     {
         $this->call(AdminUserSeeder::class);
         $this->call(AjustesSeeder::class);
-
-        if (Categoria::query()->exists() || Producto::query()->exists()) {
-            $this->command?->warn('Catalogo ya cargado: se omite CatalogoSeeder.');
-
-            return;
-        }
-
-        $this->call(CatalogoSeeder::class);
     }
 }
