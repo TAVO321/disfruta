@@ -13,15 +13,19 @@ const ENLACES = [
 
 export function Navbar({ onAbrirCarrito }) {
   const { cantidad } = useCarrito()
-  const { url, ajustes, auth } = usePage().props
+  // En Inertia 3 la url vive en la pagina, no dentro de props.
+  const { url, props } = usePage()
+  const { ajustes, auth } = props
   const whatsapp = ajustes?.whatsapp ?? ''
+  // la url trae query string (?q=ajo): el menu compara solo el path
+  const actualUrl = (url ?? '/').split('?')[0]
 
   const [abierto, setAbierto] = useState(false)
   const [scrolleado, setScrolleado] = useState(false)
   const cerrado = () => setAbierto(false)
 
   const actual = (ruta) =>
-    ruta === '/' ? url === '/' : url === ruta || url.startsWith(`${ruta}/`)
+    ruta === '/' ? actualUrl === '/' : actualUrl === ruta || actualUrl.startsWith(`${ruta}/`)
 
   useEffect(() => {
     const alScroll = () => setScrolleado(window.scrollY > 12)
@@ -38,6 +42,13 @@ export function Navbar({ onAbrirCarrito }) {
     >
       <div className="container-disfruta flex items-center justify-between py-4">
         <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="DISFRUTA, inicio" onClick={cerrado}>
+          <img
+            src="/images/logo.png"
+            alt="DISFRUTA"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-xl object-contain"
+          />
           <span className="font-serif text-xl font-bold tracking-[0.16em] text-verde">
             DISFRUTA
           </span>

@@ -7,6 +7,20 @@ import LayoutAdmin from '@/layouts/LayoutAdmin'
 
 const pages = import.meta.glob('./pages/**/*.jsx', { eager: true })
 
+// Inertia 3 no toma un prop layout en <App>: lee el estatico Component.layout.
+// Se asigna aqui para no repetirlo en cada pagina. El login va sin chrome:
+// no lleva layout, y devolver la pagina tal cual hace entrar a Inertia en un
+// loop de renders.
+Object.entries(pages).forEach(([ruta, modulo]) => {
+  const Componente = modulo.default
+
+  if (ruta.endsWith('Admin/Acceso.jsx')) return
+
+  Componente.layout = ruta.startsWith('./pages/Admin/')
+    ? (page) => <LayoutAdmin>{page}</LayoutAdmin>
+    : (page) => <LayoutPublico>{page}</LayoutPublico>
+})
+
 createInertiaApp({
   title: (titulo) => (titulo ? `${titulo} · DISFRUTA` : 'DISFRUTA'),
 
@@ -15,20 +29,9 @@ createInertiaApp({
   resolve: (name) => resolvePageComponent(`./pages/${name}.jsx`, pages),
 
   setup({ el, App, props }) {
-    // El layout se resuelve en cada navegacion (no una sola vez al cargar):
-    // asi ir del panel a la web o al login cambia el chrome correctamente.
-    const resolverLayout = (page) => {
-      const url = window.location.pathname
-
-      if (url === '/admin/acceso') return page
-      if (url.startsWith('/admin')) return <LayoutAdmin>{page}</LayoutAdmin>
-
-      return <LayoutPublico>{page}</LayoutPublico>
-    }
-
     createRoot(el).render(
       <ProveedorCarrito>
-        <App {...props} layout={resolverLayout} />
+        <App {...props} />
       </ProveedorCarrito>,
     )
   },

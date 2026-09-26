@@ -20,6 +20,7 @@ Route::post('/catalogo/{producto:slug}/resenas', [ResenaController::class, 'stor
     ->name('catalogo.resenas.store');
 Route::get('/promociones', [TiendaController::class, 'promociones'])->name('promociones');
 Route::get('/nosotros', [TiendaController::class, 'nosotros'])->name('nosotros');
+Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito');
 Route::post('/carrito/confirmar', [CarritoController::class, 'confirmar'])->name('carrito.confirmar');
 Route::get('/carrito/confirmado/{pedido}', [CarritoController::class, 'confirmado'])->name('carrito.confirmado');
 

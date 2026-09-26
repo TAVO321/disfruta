@@ -35,10 +35,14 @@ export function TarjetaAdmin({ titulo, subtitulo, accion, children }) {
 
 export default function LayoutAdmin({ children }) {
   const [abierto, setAbierto] = useState(false)
-  const { url, auth } = usePage().props
+  // En Inertia 3 la url vive en la pagina, no dentro de props.
+  const { url, props } = usePage()
+  const { auth } = props
+  // la url trae query string: el menu lateral compara solo el path
+  const actualUrl = (url ?? '/').split('?')[0]
 
   const activo = (ruta, exacto) =>
-    exacto ? url === ruta : url === ruta || url.startsWith(`${ruta}/`)
+    exacto ? actualUrl === ruta : actualUrl === ruta || actualUrl.startsWith(`${ruta}/`)
 
   const salir = () => router.post('/admin/salir')
 
@@ -80,6 +84,13 @@ export default function LayoutAdmin({ children }) {
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-crema-profundo bg-verde text-crema lg:flex">
           <div className="border-b border-crema/12 px-5 py-5">
             <Link href="/" className="flex items-center gap-2.5">
+              <img
+                src="/images/logo.png"
+                alt="DISFRUTA"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg bg-crema object-contain p-0.5"
+              />
               <span>
                 <span className="block font-serif text-base font-bold tracking-[0.14em]">DISFRUTA</span>
                 <span className="block text-[0.6rem] tracking-[0.15em] text-dorado-claro uppercase">

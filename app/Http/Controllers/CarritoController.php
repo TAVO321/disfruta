@@ -94,6 +94,15 @@ class CarritoController extends Controller
     }
 
     /**
+     * El carrito vive en el navegador, asi que esta pagina no consulta nada:
+     * solo le da una URL propia ademas del panel lateral.
+     */
+    public function index(): Response
+    {
+        return Inertia::render('Carrito/Index');
+    }
+
+    /**
      * Muestra el resumen del pedido recien confirmado. Solo se puede ver el
      * pedido que esta misma sesion acaba de registrar.
      */

@@ -69,11 +69,19 @@ class PaginasPublicasTest extends TestCase
             '/catalogo/'.$producto->slug,
             '/promociones',
             '/nosotros',
+            '/carrito',
         ];
 
         foreach ($rutas as $ruta) {
             $this->get($ruta)->assertOk();
         }
+    }
+
+    public function test_el_carrito_tiene_pagina_propia_ademas_del_panel(): void
+    {
+        $page = $this->get('/carrito')->assertOk();
+
+        $this->assertSame('Carrito/Index', $page->viewData('page')['component']);
     }
 
     public function test_el_html_tiene_el_contenedor_where_se_monta_react(): void
