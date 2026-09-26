@@ -2,17 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeder de produccion: deja la base con lo minimo indispensable para que el
- * sitio funcione, y nada de contenido de ejemplo.
+ * Seeder de produccion.
  *
- * - AdminUserSeeder y AjustesSeeder usan updateOrCreate, asi que son idempotentes
- *   y se pueden correr en cada deploy sin duplicar nada.
- * - NO se carga CatalogoSeeder a proposito: los productos, lotes, promociones y
- *   resenas se cargan a mano desde el panel de administracion.
- * - NO se carga PedidosDemoSeeder: en produccion no hay pedidos falsos.
+ * Se divide en dos partes:
+ *
+ * 1. Lo que SIEMPRE corre, porque usa updateOrCreate y es idempotente:
+ *    el usuario administrador y los ajustes del sitio.
+ *
+ * 2. La mercaderia de arranque (catalogo, promociones, resenas y pedidos de
+ *    ejemplo), que SOLO corre si la base esta vacia. CatalogoSeeder y
+ *    PedidosDemoSeeder usan create() y no son idempotentes: si se corrieran en
+ *    cada deploy duplicarian productos, lotes, promociones y pedidos.
+ *
+ * Cuando cargues tu mercaderia real desde el panel de administracion, el guard
+ * va a seguir omitiendo el catalogo, asi que ProductionSeeder se puede dejar
+ * como deploy command sin riesgo.
  */
 class ProductionSeeder extends Seeder
 {
@@ -20,5 +29,14 @@ class ProductionSeeder extends Seeder
     {
         $this->call(AdminUserSeeder::class);
         $this->call(AjustesSeeder::class);
+
+        if (Categoria::query()->exists() || Producto::query()->exists()) {
+            $this->command?->warn('El catalogo ya tiene mercaderia: se omite la carga inicial.');
+
+            return;
+        }
+
+        $this->call(CatalogoSeeder::class);
+        $this->call(PedidosDemoSeeder::class);
     }
 }

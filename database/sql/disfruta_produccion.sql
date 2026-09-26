@@ -1,5 +1,5 @@
 -- ============================================================================
---  DISFRUTA - Base de datos vacia para produccion
+--  DISFRUTA - Base de datos de produccion con mercaderia
 -- ============================================================================
 --  Generada el 26/09/2026 con Laravel 13. Compatible con MySQL 8.
 --
@@ -8,12 +8,18 @@
 --    - La tabla 'migrations' ya completa, para que 'php artisan migrate' no
 --      intente volver a crear las tablas y no reviente con el error
 --      "Table 'users' already exists".
---    - 4 filas en 'ajustes' (WhatsApp, zonas de entrega, horario, banco).
+--    - 12 productos en 5 categorias, con sus 14 lotes y stock real.
+--    - 5 promociones, 10 resenas de ejemplo y 4 pedidos de ejemplo.
+--    - 4 ajustes del sitio (WhatsApp, zonas de entrega, horario, banco).
 --    - 1 usuario administrador.
 --
---  QUE NO CONTIENE (a proposito)
---    - Productos, categorias, lotes, imagenes, promociones, resenas,
---      clientes ni pedidos. Eso lo cargas vos desde el panel de administracion.
+--  QUE ES DATO DE EJEMPLO Y VAS A REEMPLAZAR
+--    - Los 12 productos y sus precios son de ejemplo. Corregilos o borralos y
+--      cargá los tuyos desde el panel de administracion.
+--    - Las 10 resenas y los 4 pedidos son inventados, sirven para que el panel
+--      no se vea vacio. No afectan al funcionamiento del sitio.
+--    - El WhatsApp es un numero falso (59170000000). Cambialo en
+--      /admin -> Ajustes apenas tengas el real, si no los pedidos no llegan.
 --
 --  COMO IMPORTARLO
 --    1. Crea la base de datos en UTF-8 (utf8mb4_unicode_ci).
@@ -24,6 +30,12 @@
 --  IMPORTANTE
 --    El archivo es idempotente: usa CREATE TABLE IF NOT EXISTS e INSERT IGNORE.
 --    Si lo volves a importar NO borra los productos que hayas cargado.
+--
+--  ALTERNATIVA SIN IMPORTAR NADA
+--    Si preferis que el deploy se arme solo, deja este deploy command:
+--      php artisan migrate --force && php artisan db:seed --class=ProductionSeeder --force
+--    ProductionSeeder es idempotente: carga la mercaderia solo si la base esta
+--    vacia, y en cada deploy solo refresca el admin y los ajustes.
 --
 --  USUARIO ADMINISTRADOR
 --    Email:    admin@disfruta.bo
@@ -147,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `categorias` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `categorias_slug_unique` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,6 +168,7 @@ CREATE TABLE IF NOT EXISTS `categorias` (
 
 LOCK TABLES `categorias` WRITE;
 /*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
+INSERT  IGNORE INTO `categorias` (`id`, `slug`, `nombre`, `descripcion`, `orden`, `activo`, `created_at`, `updated_at`) VALUES (1,'encurtidos','Encurtidos','Cebollas, ajos y verduras en vinagre.',0,1,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(2,'escabechos','Escabechos','Conservas en vinagre, aceite y especias.',1,1,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(3,'picantes','Picantes','Del suave al que deja memoria.',2,1,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(4,'ajos','Ajos','Ajo encurtido y en aceite de oliva.',3,1,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(5,'combos','Combos','Packs de assorted para compartir.',4,1,'2026-09-26 21:26:05','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -175,7 +188,7 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `clientes_telefono_index` (`telefono`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,6 +197,7 @@ CREATE TABLE IF NOT EXISTS `clientes` (
 
 LOCK TABLES `clientes` WRITE;
 /*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
+INSERT  IGNORE INTO `clientes` (`id`, `nombre`, `telefono`, `zona`, `notas`, `created_at`, `updated_at`) VALUES (1,'Valentina Rojas','+591 70111222','Sopocachi','Entregar por la tarde.','2026-09-26 21:26:05','2026-09-26 21:26:05'),(2,'Marcelo Salinas','+591 71233445','Zona Sur',NULL,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(3,'Camila Ferrufino','+591 68455667','Achocalla','Sin cebolla en el combo.','2026-09-26 21:26:05','2026-09-26 21:26:05'),(4,'Diego Mamani','+591 77688990','San Miguel','Reserva para el pr├│ximo lote.','2026-09-26 21:26:05','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -322,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `lotes` (
   PRIMARY KEY (`id`),
   KEY `lotes_producto_id_restante_index` (`producto_id`,`restante`),
   CONSTRAINT `lotes_producto_id_foreign` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -331,6 +345,7 @@ CREATE TABLE IF NOT EXISTS `lotes` (
 
 LOCK TABLES `lotes` WRITE;
 /*!40000 ALTER TABLE `lotes` DISABLE KEYS */;
+INSERT  IGNORE INTO `lotes` (`id`, `producto_id`, `codigo`, `fecha_elaboracion`, `fecha_consumo_recomendado`, `cantidad`, `restante`, `created_at`, `updated_at`) VALUES (1,1,'CM-2609-A','2026-09-02','2026-12-02',20,14,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(2,1,'CM-2609-B','2026-09-16','2026-12-16',18,10,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(3,2,'JE-2608-D','2026-08-28','2026-11-28',16,5,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(4,2,'JE-2609-A','2026-09-12','2026-12-12',14,13,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(5,3,'UE-2608-A','2026-08-15','2026-11-15',20,0,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(6,4,'HA-2609-L','2026-09-05','2026-12-05',12,7,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(7,5,'AE-2608-B','2026-08-30','2026-11-30',15,12,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(8,6,'PM-2607-C','2026-07-20','2026-10-20',14,3,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(9,7,'PQ-2609-A','2026-09-10','2026-12-10',18,15,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(10,8,'CPR-2609-A','2026-09-12','2026-12-12',12,9,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(11,9,'AV-2609-B','2026-09-01','2026-12-01',18,18,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(12,10,'PA-2607-A','2026-07-28','2026-10-28',16,0,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(13,11,'RT-2609-A','2026-09-08','2026-11-08',16,14,'2026-09-26 21:26:05','2026-09-26 21:26:05'),(14,12,'MP-2608-A','2026-08-20','2026-11-20',12,0,'2026-09-26 21:26:05','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `lotes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -401,7 +416,7 @@ CREATE TABLE IF NOT EXISTS `pedido_items` (
   KEY `pedido_items_pedido_id_index` (`pedido_id`),
   CONSTRAINT `pedido_items_pedido_id_foreign` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `pedido_items_producto_id_foreign` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,6 +425,7 @@ CREATE TABLE IF NOT EXISTS `pedido_items` (
 
 LOCK TABLES `pedido_items` WRITE;
 /*!40000 ALTER TABLE `pedido_items` DISABLE KEYS */;
+INSERT  IGNORE INTO `pedido_items` (`id`, `pedido_id`, `producto_id`, `nombre`, `precio`, `cantidad`, `reserva`, `subtotal`) VALUES (1,1,6,'Pepinos con Semillas de Mostaza',30.00,1,0,30.00),(2,1,12,'Ma├¡z Dulce con Chile Suave',27.00,2,0,54.00),(3,2,7,'Escabeche para Pique Macho',55.00,1,1,55.00),(4,2,10,'Pimientos Asados al Escabeche',38.00,2,1,76.00),(5,3,7,'Escabeche para Pique Macho',55.00,2,0,110.00),(6,3,9,'Aceitunas Verdes con Mejorana',32.00,2,0,64.00),(7,3,11,'Relish de Tomate con Ajo',34.00,1,1,34.00),(8,4,4,'Habanero Ahumado',38.00,1,0,38.00),(9,4,5,'Ajo Encurtido Suave',26.00,2,1,52.00),(10,4,7,'Escabeche para Pique Macho',55.00,2,1,110.00);
 /*!40000 ALTER TABLE `pedido_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -435,7 +451,7 @@ CREATE TABLE IF NOT EXISTS `pedidos` (
   KEY `pedidos_estado_index` (`estado`),
   KEY `pedidos_created_at_index` (`created_at`),
   CONSTRAINT `pedidos_cliente_id_foreign` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -444,6 +460,7 @@ CREATE TABLE IF NOT EXISTS `pedidos` (
 
 LOCK TABLES `pedidos` WRITE;
 /*!40000 ALTER TABLE `pedidos` DISABLE KEYS */;
+INSERT  IGNORE INTO `pedidos` (`id`, `cliente_id`, `cliente_nombre`, `telefono`, `zona`, `notas`, `estado`, `total`, `created_at`, `updated_at`) VALUES (1,1,'Valentina Rojas','+591 70111222','Sopocachi','Entregar por la tarde.','entregado',84.00,'2026-09-14 14:00:00','2026-09-26 21:26:05'),(2,2,'Marcelo Salinas','+591 71233445','Zona Sur',NULL,'confirmado',131.00,'2026-09-22 14:07:00','2026-09-26 21:26:05'),(3,3,'Camila Ferrufino','+591 68455667','Achocalla','Sin cebolla en el combo.','preparando',208.00,'2026-09-24 14:14:00','2026-09-26 21:26:05'),(4,4,'Diego Mamani','+591 77688990','San Miguel','Reserva para el pr├│ximo lote.','nuevo',200.00,'2026-09-26 14:21:00','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -487,7 +504,7 @@ CREATE TABLE IF NOT EXISTS `productos` (
   KEY `productos_activo_destacado_index` (`activo`,`destacado`),
   KEY `productos_precio_index` (`precio`),
   CONSTRAINT `productos_categoria_id_foreign` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -496,6 +513,7 @@ CREATE TABLE IF NOT EXISTS `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
+INSERT  IGNORE INTO `productos` (`id`, `categoria_id`, `nombre`, `slug`, `descripcion_corta`, `descripcion`, `precio`, `precio_antes`, `presentacion`, `nivel_picante`, `stock`, `stock_minimo`, `peso`, `ingredientes`, `platos_recomendados`, `tono`, `recomendacion_consumo`, `conservacion`, `insignia`, `limitado`, `temporada`, `combo`, `destacado`, `activo`, `created_at`, `updated_at`, `deleted_at`) VALUES (1,1,'Cebolla Morada Encurtida','p-cebolla-morada','Crujiente, agridulce y rosada. La reina de la parrilla.','Cebolla morada cortada en p├®talos finos y encurtida lentamente en vinagre de alcohol con sal marina, laurel y granos de pimienta. El resultado es una cebolla que mantiene el crocante, con un dulzor ├ícido muy equilibrado que se lleva perfecto la grasa de la carne a la parrilla.',28.00,NULL,'Frasco 350 g','suave',24,6,350,'[\"Cebolla morada fresca\",\"Vinagre de alcohol\",\"Agua\",\"Sal marina\",\"Laurel\",\"Pimienta en grano\",\"Semillas de coriander\"]','[\"parrillada\",\"choripan\",\"carnes\",\"hamburguesas\",\"empanadas\"]','{\"fondo\":\"#EFE3CC\",\"contenido\":\"#C9A0D6\",\"acento\":\"#8E4FA8\",\"tapa\":\"#1F3D2B\"}','Ideal para acompa├▒ar la carne asada y los choripanes. Untalo sobre el pan caliente apenas salido de la parrilla.','Conservar en lugar fresco y seco. Una vez abierto, refrigerar. Agitar antes de usar.','M├ís vendido',0,0,0,1,1,'2026-01-15 13:00:00','2026-09-26 21:26:05',NULL),(2,2,'Jalape├▒os en Escabeche','p-jalapeno-escabeche','Cl├ísicos, con la semilla y ese punto justo de picante.','Jalape├▒os enteros sin semillas, escalados a vapor y conservados en escabeche de vinagre, aceite de oliva, ajo, or├®gano y chile guajillo. Textura firme, brillo aceitoso y ese picante medio que se va abriendo de a poco.',32.00,NULL,'Frasco 350 g','medio',18,5,350,'[\"Jalape\\u00f1os frescos\",\"Vinagre de alcohol\",\"Aceite de oliva virgen extra\",\"Ajo\",\"Or\\u00e9gano\",\"Chile guajillo\",\"Sal marina\"]','[\"parrillada\",\"tacos\",\"hamburguesas\",\"queso\",\"pizzas\"]','{\"fondo\":\"#F2E2CB\",\"contenido\":\"#C8452F\",\"acento\":\"#8E2A1B\",\"tapa\":\"#1F3D2B\"}','Para acompa├▒ar la parrilla, completar unos tacos o servirlo como entrada con queso y galletitas.','Guardar en lugar seco y fresco. Una vez abierto, refrigerar y consumir en 30 d├¡as.','Favorito de la casa',0,0,0,1,1,'2026-01-15 13:00:00','2026-09-26 21:26:05',NULL),(3,3,'Uchus en Escabeche Suave','p-uchu-escabeche','Picante redondo y de fondo que mancha, pero vale la pena.','Uchu amarillo entero y sin semillas, en escabeche de vinagre con ajo, cebolla y un toque de chile suave. Morderlo es un viaje: primero el dulzor del escabeche, despu├®s el ardor que crece y queda memoria de la comida entera.',35.00,40.00,'Frasco 350 g','picante',0,4,350,'[\"Uchu amarillo\",\"Vinagre de alcohol\",\"Agua\",\"Ajo\",\"Cebolla\",\"Chili en polvo suave\",\"Sal marina\"]','[\"parrillada\",\"choripan\",\"tacos\",\"pique-macho\",\"empanadas\"]','{\"fondo\":\"#F0DFC4\",\"contenido\":\"#D9741F\",\"acento\":\"#A4500F\",\"tapa\":\"#2D5439\"}','Para los que quieren que la comida tenga un cambio de nivel. Cortalo en diagonal para que libere m├ís picante.','Refrigerar una vez abierto. Agitar bien antes de servir.','Sin stock',0,0,0,1,1,'2026-02-02 13:00:00','2026-09-26 21:26:05',NULL),(4,3,'Habanero Ahumado','p-picante-habanero','Edici├│n de temporada. Ahumado suave, picante de verdad.','Habaneros de huerta cepillados con humo de le├▒a y luego encurtidos en vinagre con achiote suave y miel de ca├▒a. Es la edici├│n m├ís aguardada del a├▒o: limitada, arom├ítica y con un picante que llega a temperatura.',38.00,NULL,'Frasco 220 g','muy-picante',7,4,220,'[\"Habanero fresco\",\"Vinagre de alcohol\",\"Achiote\",\"Miel de ca\\u00f1a\",\"Ajo\",\"Piment\\u00f3n ahumado\",\"Sal marina\"]','[\"tacos\",\"pique-macho\",\"parrillada\",\"pizzas\",\"carnes\"]','{\"fondo\":\"#F5DEC9\",\"contenido\":\"#B23434\",\"acento\":\"#7E1F1F\",\"tapa\":\"#1F3D2B\"}','Usalo en cantidades peque├▒as al principio y siempre acompa├▒ado: la idea es que suba el calor de a poco.','Refrigeraci├│n permanente. Agitar antes de usar.','Edici├│n limitada',1,1,0,0,1,'2026-06-10 13:00:00','2026-09-26 21:26:05',NULL),(5,4,'Ajo Encurtido Suave','p-ajo-encurtido','Dientes enteros y tiernos, para la carne o el pan.','Dientes de ajo nuevo enteros, escalados y encurtidos en vinagre con laurel, tomillo y un toque de piment├│n dulce. Quedan tiernos y con un sabor suave que no pica. Imprescindible en la mesa.',26.00,NULL,'Frasco 220 g','suave',12,5,220,'[\"Ajo nuevo\",\"Vinagre de alcohol\",\"Agua\",\"Sal marina\",\"Laurel\",\"Tomillo\",\"Piment\\u00f3n dulce\"]','[\"carnes\",\"parrillada\",\"pastas\",\"papas\",\"pizzas\"]','{\"fondo\":\"#EDE6D2\",\"contenido\":\"#E5D6A8\",\"acento\":\"#B49A5A\",\"tapa\":\"#1F3D2B\"}','Acompa├▒├í la carne asada, las milanesas o las pastas. Tambi├®n va muy bien con queso fresco.','Lugar seco y fresco. Refrigerar una vez abierto.',NULL,0,0,0,1,1,'2026-01-20 13:00:00','2026-09-26 21:26:05',NULL),(6,1,'Pepinos con Semillas de Mostaza','p-pepino-queso','Crocentes, arom├íticos, el cl├ísico que nunca falla.','Pepinos encurtidos en vinagre con sal, dill, laurel y semillas de mostaza que les dan un perfume particular. Es el cl├ísico de la mesa: crocante, ├ícido y perfecto para cortar la grasitud.',30.00,NULL,'Frasco 500 g','suave',3,5,500,'[\"Pepino\",\"Vinagre de alcohol\",\"Agua\",\"Sal marina\",\"Semillas de mostaza\",\"Dill\",\"Laurel\"]','[\"choripan\",\"parrillada\",\"empanadas\",\"queso\",\"carnes\"]','{\"fondo\":\"#E2E9DE\",\"contenido\":\"#5E8C4E\",\"acento\":\"#2D5439\",\"tapa\":\"#C89B3C\"}','El acompa├▒ante de la parrilla por excelencia. Agr├®galos a la plancha final para que se calienten apenas.','Refrigerar despu├®s de abierto. Consumir en 30 d├¡as.','├Ültimos frascos',0,0,0,0,1,'2026-01-25 13:00:00','2026-09-26 21:26:05',NULL),(7,5,'Escabeche para Pique Macho','p-pique-macho','Aj├¡, cebolla y morr├│n. Listo para el pique.','Nuestro escabeche m├ís intenso: aj├¡ colorado, cebolla morada, morr├│n asado, ajo y or├®gano, todo en aceite y vinagre. Pensado y testeado para el pique macho: le da el picante justo y el aroma que la carne necesita.',55.00,65.00,'Frasco 500 g','picante',15,5,500,'[\"Aj\\u00ed colorado\",\"Cebolla morada\",\"Morr\\u00f3n asado\",\"Ajo\",\"Or\\u00e9gano\",\"Vinagre\",\"Aceite de oliva\",\"Sal marina\"]','[\"pique-macho\",\"carnes\",\"parrillada\",\"choripan\",\"empanadas\"]','{\"fondo\":\"#E9E0CE\",\"contenido\":\"#B4623A\",\"acento\":\"#7A3A1E\",\"tapa\":\"#1F3D2B\"}','Directo sobre la carne servida en la fuente. Tambi├®n perfecto para marinar pollo antes de la parrilla.','Refrigerar una vez abierto. Agitar antes de servir.','Para la parrilla',0,0,0,1,1,'2026-03-05 13:00:00','2026-09-26 21:26:05',NULL),(8,5,'Combo Parrillera DISFRUTA','p-combo-parrillada','Cebolla morada + escabeche para pique + jalape├▒os. Listo para la parrilla.','La caja con todo lo que no puede faltar el finde de la parrilla: Cebolla Morada Encurtida, Jalape├▒os en Escabeche y Escabeche para Pique Macho. Tres frascos, tres sabores, cero excusas para arrancar el asado bien.',95.00,120.00,'Pack x3','medio',9,3,1200,'[\"Cebolla morada encurtida 350 g\",\"Jalape\\u00f1os en escabeche 350 g\",\"Escabeche para pique macho 500 g\"]','[\"parrillada\",\"pique-macho\",\"choripan\",\"carnes\"]','{\"fondo\":\"#E9E0CE\",\"contenido\":\"#B4623A\",\"acento\":\"#7A3A1E\",\"tapa\":\"#1F3D2B\"}','Pensado para compartir entre 4 y 6 personas en un asado. Aguantan perfecto el viaje hasta la parrilla.','Cada frasco se conserva por separado, seg├║n su etiqueta. Guardar en lugar seco y fresco.','Ahorr├ís Bs 25',0,0,1,1,1,'2026-04-01 13:00:00','2026-09-26 21:26:05',NULL),(9,1,'Aceitunas Verdes con Mejorana','p-aceituna-verde','Suaves, saladas, con el toque de la mejorana.','Aceitunas verdes curadas en salmuera y luego encurtidas con vinagre, ajo, laurel y mejorana. Carnosas y nada amargas. La guarnici├│n que le da un toque gourmet a toda la mesa.',32.00,NULL,'Frasco 350 g','suave',18,6,350,'[\"Aceitunas verdes\",\"Vinagre de alcohol\",\"Agua\",\"Sal marina\",\"Ajo\",\"Laurel\",\"Mejorana\"]','[\"queso\",\"carnes\",\"parrillada\",\"pizzas\",\"pastas\"]','{\"fondo\":\"#E2E9DE\",\"contenido\":\"#5E8C4E\",\"acento\":\"#2D5439\",\"tapa\":\"#C89B3C\"}','En la tabla de quesos, con una copa de tinto. Y como guarnici├│n, junto a la carne asada.','Refrigerar una vez abierto. Conservar siempre sumergidas.',NULL,0,0,0,0,1,'2026-02-18 13:00:00','2026-09-26 21:26:05',NULL),(10,2,'Pimientos Asados al Escabeche','p-pimiento-aspado','Dulces, asados, en aceite y vinagre. La guarnici├│n elegante.','Pimientos rojos y amarillos asados a la llama, pelados a mano y luego puestos en escabeche con ajo, laurel y aceite de oliva. Dulces, arom├íticos, sin acidez pesada. Guarnecen cualquier plato.',38.00,NULL,'Frasco 350 g','suave',0,5,350,'[\"Pimientos rojos\",\"Pimientos amarillos\",\"Vinagre de alcohol\",\"Aceite de oliva\",\"Ajo\",\"Laurel\",\"Az\\u00facar para balancear\"]','[\"carnes\",\"parrillada\",\"pastas\",\"pizzas\",\"queso\"]','{\"fondo\":\"#F2E2CB\",\"contenido\":\"#C8452F\",\"acento\":\"#8E2A1B\",\"tapa\":\"#1F3D2B\"}','Como guarnici├│n de la carne o de las pastas. Combinado con queso y pan casero.','Refrigerar una vez abierto. Agitar con cuidado.','Temporada ┬À sin stock',0,1,0,0,1,'2026-05-12 13:00:00','2026-09-26 21:26:05',NULL),(11,5,'Relish de Tomate con Ajo','p-relish-tomate','El condimento que cambia todos los s├ínguches.','Tomates maduros licuados y reducidos lentamente con cebolla, ajo, piment├│n ahumado, or├®gano y un toque de vinagre de manzana. Se conserva con aceite, como un buen relish casero. Ideal para hamburguesas y s├ínguches.',34.00,NULL,'Frasco 220 g','suave',14,5,220,'[\"Tomate perita maduro\",\"Cebolla\",\"Ajo\",\"Piment\\u00f3n ahumado\",\"Or\\u00e9gano\",\"Vinagre de manzana\",\"Aceite de oliva\"]','[\"hamburguesas\",\"choripan\",\"pizzas\",\"queso\",\"empanadas\"]','{\"fondo\":\"#E9E0CE\",\"contenido\":\"#B4623A\",\"acento\":\"#7A3A1E\",\"tapa\":\"#1F3D2B\"}','Una pintita sobre la carne de la hamburguesa o el pan de un s├índwich. Cambia por completo el plato.','Refrigerado. Consumir en 20 d├¡as una vez abierto.',NULL,0,0,0,1,1,'2026-03-20 13:00:00','2026-09-26 21:26:05',NULL),(12,3,'Ma├¡z Dulce con Chile Suave','p-maiz-picante','Dulce con un latigazo suave. Sorprende a todos.','Ma├¡z dulce seleccionado y encurtido en vinagre con piment├│n dulce, ajo y un toque de chile suave. El contraste dulce, ├ícido y picante lo convierte en el acompa├▒amiento m├ís PEDIDO del cat├ílogo.',27.00,NULL,'Frasco 350 g','medio',0,4,350,'[\"Ma\\u00edz dulce\",\"Vinagre de alcohol\",\"Agua\",\"Sal marina\",\"Piment\\u00f3n dulce\",\"Ajo\",\"Chile suave\"]','[\"parrillada\",\"carnes\",\"empanadas\",\"pique-macho\",\"tacos\"]','{\"fondo\":\"#F4EAD4\",\"contenido\":\"#E0B869\",\"acento\":\"#A87A22\",\"tapa\":\"#1F3D2B\"}','Sumalo a la parrilla como guarnici├│n sorpresa. Tambi├®n va bien en un guiso o una tortilla.','Refrigerar una vez abierto. Agitar antes de usar.','Sin stock ┬À reservar',0,1,0,0,1,'2026-07-01 13:00:00','2026-09-26 21:26:05',NULL);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -514,7 +532,7 @@ CREATE TABLE IF NOT EXISTS `promocion_producto` (
   KEY `promocion_producto_producto_id_foreign` (`producto_id`),
   CONSTRAINT `promocion_producto_producto_id_foreign` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `promocion_producto_promocion_id_foreign` FOREIGN KEY (`promocion_id`) REFERENCES `promociones` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -523,6 +541,7 @@ CREATE TABLE IF NOT EXISTS `promocion_producto` (
 
 LOCK TABLES `promocion_producto` WRITE;
 /*!40000 ALTER TABLE `promocion_producto` DISABLE KEYS */;
+INSERT  IGNORE INTO `promocion_producto` (`id`, `promocion_id`, `producto_id`) VALUES (1,1,3),(2,2,8),(3,3,4),(4,4,6),(5,5,7);
 /*!40000 ALTER TABLE `promocion_producto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -546,7 +565,7 @@ CREATE TABLE IF NOT EXISTS `promociones` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `promociones_slug_unique` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -555,6 +574,7 @@ CREATE TABLE IF NOT EXISTS `promociones` (
 
 LOCK TABLES `promociones` WRITE;
 /*!40000 ALTER TABLE `promociones` DISABLE KEYS */;
+INSERT  IGNORE INTO `promociones` (`id`, `titulo`, `slug`, `descripcion`, `tipo`, `descuento`, `activa`, `vigente_desde`, `vigente_hasta`, `created_at`, `updated_at`) VALUES (1,'Oferta ┬À Uchus en Escabeche','oferta-uchus-en-escabeche','Picante redondo con precio especial. Aprovechando el pr├│ximo lote: encarg├í el tuyo y lo ten├®s fresco en dos semanas.','oferta',15,1,NULL,'2026-10-15','2026-09-26 21:26:05','2026-09-26 21:26:05'),(2,'Combo Parrillera ┬À Ahorro Bs 25','combo-parrillera-ahorro-bs-25','Cebolla morada, jalape├▒os y escabeche para pique macho. Todo lo que necesit├ís para arrancar la parrilla bien.','combo',18,1,NULL,'2026-12-31','2026-09-26 21:26:05','2026-09-26 21:26:05'),(3,'Temporada ┬À Habanero Ahumado','temporada-habanero-ahumado','Edici├│n limitada elaborada con habaneros de huerta. Poca producci├│n, sabor muy nuestro.','temporada',0,1,NULL,'2026-11-30','2026-09-26 21:26:05','2026-09-26 21:26:05'),(4,'├Ültimos frascos ┬À Pepinos con Mostaza','ultimos-frascos-pepinos-con-mostaza','Quedan 3 frascos del lote de julio. Cuando terminen, la producci├│n se reinicia en octubre.','limitado',10,1,NULL,'2026-10-05','2026-09-26 21:26:05','2026-09-26 21:26:05'),(5,'Oferta ┬À Escabeche para Pique Macho','oferta-escabeche-para-pique-macho','Escabeche de aj├¡ colorado, cebolla morada y morr├│n asado. El condimento que estaba faltando en tu asado.','oferta',12,1,NULL,'2026-10-31','2026-09-26 21:26:05','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `promociones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -576,7 +596,7 @@ CREATE TABLE IF NOT EXISTS `resenas` (
   PRIMARY KEY (`id`),
   KEY `resenas_producto_id_visible_index` (`producto_id`,`visible`),
   CONSTRAINT `resenas_producto_id_foreign` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,6 +605,7 @@ CREATE TABLE IF NOT EXISTS `resenas` (
 
 LOCK TABLES `resenas` WRITE;
 /*!40000 ALTER TABLE `resenas` DISABLE KEYS */;
+INSERT  IGNORE INTO `resenas` (`id`, `producto_id`, `autor`, `estrellas`, `texto`, `visible`, `created_at`, `updated_at`) VALUES (1,1,'Valentina R.',5,'La cebolla va tremenda con la parrilla. Se nota que es casera de verdad, nada de sabor raro como los industrializados.',1,'2026-09-18 16:00:00','2026-09-26 21:26:05'),(2,1,'Marcos G.',5,'Le pongo a todas las hamburguesas que hago. La textura es incre├¡ble, sigue crocante.',1,'2026-09-11 16:00:00','2026-09-26 21:26:05'),(3,2,'Sof├¡a A.',4,'Excelente escabeche, tiene buen picor. Lo us├® para unos tacos y quedaron b├írbaros.',1,'2026-09-14 16:00:00','2026-09-26 21:26:05'),(4,3,'Dami├ín L.',5,'Ojo que pica en serio. Si te gusta el picante, este es el que ten├®s que llevar a la parrilla.',1,'2026-09-06 16:00:00','2026-09-26 21:26:05'),(5,8,'Familia Torres',5,'Compramos el combo para el asado del domingo y fue un ├®xito. Se nos termin├│ en dos horas.',1,'2026-09-20 16:00:00','2026-09-26 21:26:05'),(6,11,'Laura M.',5,'El relish cambi├│ mis hamburguesas. Sabor a casero, te juro.',1,'2026-09-09 16:00:00','2026-09-26 21:26:05'),(7,5,'Andr├®s P.',4,'Muy bueno, tierno y sin picar. Ideal para la carne asada.',1,'2026-08-30 16:00:00','2026-09-26 21:26:05'),(8,4,'Carla B.',5,'De lo mejor que prob├®. La edici├│n limitada vale la pena.',1,'2026-09-21 16:00:00','2026-09-26 21:26:05'),(9,7,'Nico V.',5,'Justo lo que buscaba para el pique. El morr├│n asado le da una vuelta tremenda.',1,'2026-09-15 16:00:00','2026-09-26 21:26:05'),(10,6,'Roc├¡o S.',4,'Los pepinos de siempre, muy buenos. Ojal├í hagan m├ís seguido.',1,'2026-08-25 16:00:00','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `resenas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -643,7 +664,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT  IGNORE INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `is_admin`, `remember_token`, `created_at`, `updated_at`) VALUES (1,'Administrador','admin@disfruta.bo',NULL,'$2y$12$0AtWgqnQHRoGjE1odMhSjOH5pFy6xxpJTli/Md71m6OBD6OuYrH8.',1,NULL,'2026-09-26 21:14:55','2026-09-26 21:14:55');
+INSERT  IGNORE INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `is_admin`, `remember_token`, `created_at`, `updated_at`) VALUES (1,'Administrador','admin@disfruta.bo',NULL,'$2y$12$RKaDBReYridHfNTHMtFMjuftngyTLwQ4oYOBg87MGwxhPdEBGoZju',1,NULL,'2026-09-26 21:26:05','2026-09-26 21:26:05');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -656,4 +677,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-26 13:17:07
+-- Dump completed on 2026-09-26 13:26:51
