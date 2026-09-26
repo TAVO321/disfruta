@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('estado');
-            $table->index('creado');
+            $table->index('created_at');
         });
 
         Schema::create('pedido_items', function (Blueprint $table) {
