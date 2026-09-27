@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { CarritoLateral } from '@/components/CarritoLateral'
+import { Flash } from '@/components/Flash'
 
 export default function LayoutPublico({ children }) {
   const [carritoAbierto, setCarritoAbierto] = useState(false)
@@ -21,6 +22,8 @@ export default function LayoutPublico({ children }) {
       </a>
 
       <Navbar onAbrirCarrito={() => setCarritoAbierto(true)} />
+
+      <Flash />
 
       <main id="contenido" className="flex-1">
         {children}

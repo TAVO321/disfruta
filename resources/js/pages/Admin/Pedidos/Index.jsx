@@ -16,7 +16,7 @@ const TONO_ESTADO = {
 
 export default function PedidosIndex({ pedidos, estados, filtros }) {
   const [q, setQ] = useState(filtros.q ?? '')
-  const { data, setData, post, processing, errors } = useForm({ estado: '' })
+  const { data, setData, patch, processing, errors } = useForm({ estado: '' })
   const [editando, setEditando] = useState(null)
 
   useEffect(() => setQ(filtros.q ?? ''), [filtros.q])
@@ -41,7 +41,8 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
   const cambiarEstado = (pedido) => {
     setEditando(pedido.id)
     setData('estado', pedido.estado)
-    post(`/admin/pedidos/${pedido.id}/estado`)
+    // La ruta de estado solo admite PATCH: con POST devolvia 405.
+    patch(`/admin/pedidos/${pedido.id}/estado`, { preserveScroll: true })
   }
 
   const eliminar = (pedido) => {
@@ -114,25 +115,37 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
             const abierto = editando === p.id
             return (
               <li key={p.id} className="rounded-2xl border border-crema-profundo bg-white p-4 shadow-suave">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-serif text-lg font-bold text-verde">#{p.id}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-tinta">{p.cliente}</p>
-                    <p className="text-xs text-tinta-suave">
-                      {p.telefono}
-                      {p.zona ? ` · ${p.zona}` : ''} · {fechaHora(p.creado)}
-                    </p>
+                {/* Movil: los datos se apilan en filas legibles con margen.
+                    Escritorio: vuelven a una sola linea (sm:contents + order). */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+                  <div className="flex items-center justify-between gap-2 sm:contents">
+                    <span className="font-serif text-lg font-bold text-verde sm:order-1">#{p.id}</span>
+                    <span
+                      className={`eyebrow shrink-0 rounded-full px-2.5 py-1 sm:order-3 ${
+                        TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'
+                      }`}
+                    >
+                      {NOMBRE_ESTADO[p.estado] ?? p.estado}
+                    </span>
                   </div>
-                  <span
-                    className={`eyebrow rounded-full px-2.5 py-1 ${TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'}`}
-                  >
-                    {NOMBRE_ESTADO[p.estado] ?? p.estado}
+
+                  <div className="min-w-0 sm:order-2 sm:flex-1">
+                    <p className="font-medium text-tinta sm:truncate">{p.cliente}</p>
+                    <p className="mt-1 text-sm text-tinta-suave">
+                      {p.telefono}
+                      {p.zona ? ` · ${p.zona}` : ''}
+                    </p>
+                    <p className="mt-0.5 text-xs text-tinta-suave">{fechaHora(p.creado)}</p>
+                  </div>
+
+                  <span className="font-serif text-lg font-bold text-verde sm:order-4 sm:text-base">
+                    {precio(p.total)}
                   </span>
-                  <span className="font-serif text-base font-bold text-verde">{precio(p.total)}</span>
+
                   <button
                     type="button"
                     onClick={() => setEditando(abierto ? null : p.id)}
-                    className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-crema hover:text-verde"
+                    className="w-full shrink-0 rounded-lg border border-crema-profundo px-3 py-2 text-sm font-semibold text-tinta hover:border-verde hover:text-verde sm:order-5 sm:w-auto sm:border-0 sm:px-2.5 sm:py-1.5 sm:text-xs sm:text-tinta-suave sm:hover:bg-crema"
                   >
                     {abierto ? 'Ocultar' : 'Gestionar'}
                   </button>
@@ -162,15 +175,15 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                       </p>
                     )}
 
-                    <div className="flex flex-wrap items-end gap-2.5">
-                      <div>
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-end">
+                      <div className="w-full sm:w-auto">
                         <label className="mb-1.5 block text-[0.7rem] font-semibold tracking-wide text-tinta-suave uppercase">
                           Cambiar estado
                         </label>
                         <select
                           value={data.estado}
                           onChange={(e) => setData('estado', e.target.value)}
-                          className="rounded-lg border border-crema-profundo bg-crema px-3.5 py-2.5 text-sm"
+                          className="w-full rounded-lg border border-crema-profundo bg-crema px-3.5 py-2.5 text-sm sm:w-auto"
                         >
                           {estados.map((e) => (
                             <option key={e} value={e}>
@@ -185,16 +198,21 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                         type="button"
                         onClick={() => cambiarEstado(p)}
                         disabled={processing}
-                        className="rounded-full bg-verde px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-medio disabled:opacity-50"
+                        className="w-full rounded-full bg-verde px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-medio disabled:opacity-50 sm:w-auto"
                       >
                         Guardar
                       </button>
 
                       <a
-                        href={linkWhatsApp(p.telefono, `Hola ${p.cliente}, te escribimos de DISFRUTA por tu pedido #${p.id}.`)}
+                        href={linkWhatsApp(
+                          encodeURIComponent(
+                            `Hola ${p.cliente}, te escribimos de DISFRUTA por tu pedido #${p.id}.`,
+                          ),
+                          p.telefono,
+                        )}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-full border border-verde px-5 py-2.5 text-sm font-semibold text-verde hover:bg-verde hover:text-crema"
+                        className="w-full rounded-full border border-verde px-5 py-2.5 text-center text-sm font-semibold text-verde hover:bg-verde hover:text-crema sm:w-auto"
                       >
                         WhatsApp
                       </a>
@@ -202,7 +220,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                       <button
                         type="button"
                         onClick={() => eliminar(p)}
-                        className="ml-auto rounded-full px-4 py-2.5 text-xs font-semibold text-tinta-suave hover:bg-rojo hover:text-crema"
+                        className="w-full rounded-full border border-crema-profundo px-4 py-2.5 text-xs font-semibold text-tinta-suave hover:border-rojo hover:bg-rojo hover:text-crema sm:ml-auto sm:w-auto"
                       >
                         Eliminar pedido
                       </button>

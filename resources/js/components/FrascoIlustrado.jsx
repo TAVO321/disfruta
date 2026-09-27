@@ -2,6 +2,10 @@
  * Ilustración vectorial del frasco. Se usa cuando el producto todavía no tiene
  * foto cargada desde el panel de administración, para que nunca se vea un
  * ícono de imagen rota.
+ *
+ * El viewBox usa `meet` y no `slice`: con `slice` el SVG se agranda para cubrir
+ * la caja y recorta por el lado más largo, y en las cajas 3/4 o cuadradas de las
+ * tarjetas eso se comía los círculos de los ingredientes de los costados.
  */
 export function IlustracionFrasco({ producto, className = '' }) {
   const { fondo, contenido, acento, tapa } = producto.tono
@@ -14,7 +18,7 @@ export function IlustracionFrasco({ producto, className = '' }) {
       className={className}
       role="img"
       aria-label={producto.nombre}
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <linearGradient id={`${id}-vidrio`} x1="0" y1="0" x2="1" y2="0">

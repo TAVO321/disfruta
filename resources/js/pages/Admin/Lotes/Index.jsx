@@ -69,7 +69,9 @@ export default function LotesIndex({ lotes, productos, filtros }) {
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
+      {/* minmax(0,1fr) evita que la tabla (min-w) estire el track y saque la
+          tarjeta de la pantalla; sin eso el overflow-x de la tabla no aplica. */}
+      <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <TarjetaAdmin
           titulo={editando ? `Editar lote` : 'Registrar lote'}
           subtitulo={editando ? 'No se puede cambiar el producto' : 'Sumá stock nuevo al catálogo'}
@@ -119,7 +121,7 @@ export default function LotesIndex({ lotes, productos, filtros }) {
               {errors.codigo && <p className="mt-1 text-xs text-rojo">{errors.codigo}</p>}
             </label>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold tracking-wide text-tinta-suave uppercase">
                   Elaboración
@@ -151,7 +153,7 @@ export default function LotesIndex({ lotes, productos, filtros }) {
               </label>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold tracking-wide text-tinta-suave uppercase">
                   Cantidad
@@ -230,8 +232,66 @@ export default function LotesIndex({ lotes, productos, filtros }) {
               No hay lotes con ese filtro.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[42rem] text-sm">
+            <>
+              {/* Movil: tarjetas apiladas. Una tabla de 5 columnas no entra. */}
+              <ul className="space-y-3 sm:hidden">
+                {items.map((l) => (
+                  <li key={l.id} className="rounded-xl border border-crema-oscuro p-3.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="block font-mono text-xs font-semibold text-verde">
+                          {l.codigo}
+                        </span>
+                        <Link
+                          href={`/catalogo/${l.producto.slug}`}
+                          className="mt-0.5 block truncate text-sm font-medium text-tinta underline-offset-4 hover:text-verde hover:underline"
+                        >
+                          {l.producto.nombre}
+                        </Link>
+                      </div>
+                      <span
+                        className={`shrink-0 font-serif text-sm font-bold ${
+                          l.restante > 0 ? 'text-verde' : 'text-rojo'
+                        }`}
+                      >
+                        {l.restante}
+                        <span className="text-xs font-normal text-tinta-suave"> / {l.cantidad}</span>
+                      </span>
+                    </div>
+
+                    <dl className="mt-2.5 space-y-1 border-t border-crema-oscuro pt-2.5 text-xs text-tinta-suave">
+                      <div className="flex justify-between gap-2">
+                        <dt>Elaborado</dt>
+                        <dd className="text-tinta">{fecha(l.fechaElaboracion)}</dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt>Consumir antes</dt>
+                        <dd className="text-tinta">{fecha(l.fechaConsumoRecomendado)}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => editar(l)}
+                        className="flex-1 rounded-lg bg-verde px-3 py-2 text-xs font-semibold text-crema hover:bg-verde-medio"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => eliminar(l)}
+                        className="flex-1 rounded-lg border border-crema-profundo px-3 py-2 text-xs font-semibold text-tinta-suave hover:border-rojo hover:bg-rojo hover:text-crema"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[40rem] text-sm">
                 <thead>
                   <tr className="border-b border-crema-oscuro text-left text-[0.7rem] tracking-wide text-tinta-suave uppercase">
                     <th className="pb-2.5 font-semibold">Lote</th>
@@ -291,7 +351,8 @@ export default function LotesIndex({ lotes, productos, filtros }) {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
 
           {(meta.last_page ?? 1) > 1 && (

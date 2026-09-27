@@ -50,7 +50,7 @@ class PanelAdminTest extends TestCase
 
     public function test_las_paginas_del_panel_requieren_sesion_de_admin(): void
     {
-        $rutas = ['/admin', '/admin/productos', '/admin/lotes', '/admin/pedidos', '/admin/promociones', '/admin/clientes'];
+        $rutas = ['/admin', '/admin/productos', '/admin/lotes', '/admin/pedidos', '/admin/promociones', '/admin/clientes', '/admin/usuarios', '/admin/ajustes'];
 
         foreach ($rutas as $ruta) {
             $this->get($ruta)->assertRedirect('/admin/acceso');
@@ -87,6 +87,8 @@ class PanelAdminTest extends TestCase
             '/admin/promociones/create' => 'Admin/Promociones/Form',
             '/admin/promociones/'.$promocion->id.'/edit' => 'Admin/Promociones/Form',
             '/admin/clientes' => 'Admin/Clientes/Index',
+            '/admin/usuarios' => 'Admin/Usuarios/Index',
+            '/admin/ajustes' => 'Admin/Ajustes/Index',
         ];
 
         foreach ($paginas as $ruta => $componente) {
@@ -205,6 +207,66 @@ class PanelAdminTest extends TestCase
         $this->assertNotContains(
             $promocion->id,
             array_column($this->pagina($this->get('/promociones'))['props']['promociones'], 'id'),
+        );
+    }
+
+    public function test_crear_una_promocion_la_registra_y_vuelve_al_listado(): void
+    {
+        $this->actingAs($this->admin);
+
+        $producto = Producto::firstOrFail();
+
+        // Cubre que el redirect apunte a una ruta que exista de verdad.
+        $this->post('/admin/promociones', [
+            'titulo' => 'Promo Test Automatico',
+            'descripcion' => 'Promocion creada desde el test para validar el redirect.',
+            'tipo' => 'oferta',
+            'descuento' => 15,
+            'activa' => '1',
+            'productos' => [$producto->id],
+        ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.promociones.index'));
+
+        $this->assertDatabaseHas('promociones', ['titulo' => 'Promo Test Automatico', 'descuento' => 15]);
+
+        $creada = Promocion::where('titulo', 'Promo Test Automatico')->firstOrFail();
+        $this->assertTrue($creada->productos->contains($producto));
+    }
+
+    public function test_editar_una_promocion_actualiza_sus_productos(): void
+    {
+        $this->actingAs($this->admin);
+
+        $promocion = Promocion::firstOrFail();
+        $otro = Producto::where('id', '!=', $promocion->productos->first()?->id)->firstOrFail();
+
+        $this->put('/admin/promociones/'.$promocion->id, [
+            'titulo' => $promocion->titulo.' Editada',
+            'descripcion' => $promocion->descripcion,
+            'tipo' => $promocion->tipo,
+            'descuento' => 20,
+            'activa' => '1',
+            'productos' => [$otro->id],
+        ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.promociones.index'));
+
+        $this->assertSame(20, $promocion->fresh()->descuento);
+        $this->assertSame([$otro->id], $promocion->fresh()->productos->pluck('id')->all());
+    }
+
+    public function test_el_formulario_de_edicion_de_promocion_trae_los_productos_marcados(): void
+    {
+        $this->actingAs($this->admin);
+
+        $promocion = Promocion::whereHas('productos')->firstOrFail();
+
+        $props = $this->pagina($this->get('/admin/promociones/'.$promocion->id.'/edit'))['props'];
+
+        $this->assertSame(
+            $promocion->productos->pluck('id')->sort()->values()->all(),
+            collect($props['promocion']['productos'])->sort()->values()->all(),
         );
     }
 

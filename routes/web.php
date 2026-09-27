@@ -1,12 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\AjusteController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ClienteController;
 use App\Http\Controllers\Admin\LoteController;
-use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\Admin\PanelController;
+use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\Admin\ProductoController;
 use App\Http\Controllers\Admin\PromocionController;
+use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\TiendaController;
@@ -48,4 +50,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'admin')->group(funct
         ->name('promociones.alternar');
     Route::get('clientes', [ClienteController::class, 'index'])->name('clientes');
     Route::delete('clientes/{cliente}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
+
+    Route::get('ajustes', [AjusteController::class, 'index'])->name('ajustes.index');
+    Route::put('ajustes', [AjusteController::class, 'update'])->name('ajustes.update');
+
+    Route::resource('usuarios', UsuarioController::class)->only(['index', 'store', 'update', 'destroy']);
 });

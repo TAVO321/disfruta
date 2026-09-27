@@ -49,7 +49,7 @@ class PromocionController extends Controller
         $promocion->productos()->sync($productos);
 
         return redirect()
-            ->route('admin.promociones')
+            ->route('admin.promociones.index')
             ->with('success', 'Promocion creada.');
     }
 
@@ -64,7 +64,7 @@ class PromocionController extends Controller
         $promocion->productos()->sync($this->productosIds($request));
 
         return redirect()
-            ->route('admin.promociones')
+            ->route('admin.promociones.index')
             ->with('success', 'Promocion actualizada.');
     }
 
@@ -93,7 +93,7 @@ class PromocionController extends Controller
     private function form(?Promocion $promocion): Response
     {
         return Inertia::render('Admin/Promociones/Form', [
-            'promocion' => $promocion && [
+            'promocion' => $promocion ? [
                 'id' => $promocion->id,
                 'titulo' => $promocion->titulo,
                 'descripcion' => $promocion->descripcion,
@@ -102,8 +102,8 @@ class PromocionController extends Controller
                 'activa' => (bool) $promocion->activa,
                 'vigente_desde' => $promocion->vigente_desde?->toDateString(),
                 'vigente_hasta' => $promocion->vigente_hasta?->toDateString(),
-                'productos' => $promocion->productos->pluck('id')->all(),
-            ],
+                'productos' => $promocion->productos()->pluck('productos.id')->all(),
+            ] : null,
             'tipos' => Promocion::TIPOS,
             'productos' => Producto::orderBy('nombre')->get(['id', 'nombre', 'precio']),
         ]);
@@ -125,7 +125,9 @@ class PromocionController extends Controller
 
         $datos['activa'] = (bool) ($datos['activa'] ?? false);
 
-        if ($datos['vigente_desde'] === null) {
+        // El campo es nullable: si el formulario lo manda vacio o ni lo manda,
+        // la clave no existe y la promocion arranca desde hoy.
+        if (($datos['vigente_desde'] ?? null) === null) {
             $datos['vigente_desde'] = now()->toDateString();
         }
 

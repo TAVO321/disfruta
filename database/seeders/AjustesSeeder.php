@@ -7,6 +7,12 @@ use Illuminate\Database\Seeder;
 
 class AjustesSeeder extends Seeder
 {
+    /**
+     * Crea los ajustes de arranque solo si faltan.
+     *
+     * firstOrCreate en vez de updateOrCreate: estos valores se editan desde el
+     * panel, y el deploy command vuelve a correr el seeder en cada despliegue.
+     */
     public function run(): void
     {
         $ajustes = [
@@ -17,7 +23,7 @@ class AjustesSeeder extends Seeder
         ];
 
         foreach ($ajustes as $clave => $valor) {
-            Ajuste::updateOrCreate(['clave' => $clave], ['valor' => $valor]);
+            Ajuste::firstOrCreate(['clave' => $clave], ['valor' => $valor]);
         }
     }
 }

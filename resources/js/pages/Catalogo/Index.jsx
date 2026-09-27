@@ -223,7 +223,7 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
       <div className="container-disfruta py-12">
         <header className="max-w-3xl">
           <p className="eyebrow text-dorado">Catálogo completo</p>
-          <h1 className="mt-2.5 font-serif text-4xl leading-tight font-bold text-balance text-verde sm:text-5xl">
+          <h1 className="mt-2.5 font-serif text-3xl leading-tight font-bold text-balance text-verde sm:text-4xl lg:text-5xl">
             Todos nuestros acompañamientos
           </h1>
           <p className="mt-4 leading-relaxed text-tinta-suave">

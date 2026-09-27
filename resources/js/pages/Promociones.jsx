@@ -187,18 +187,18 @@ function CombinaTuComida({ productos, platos }) {
             key={plato.id}
             className="grid gap-4 rounded-2xl border border-crema-profundo bg-white p-5 sm:grid-cols-[13rem_1fr] sm:p-6"
           >
-            <div className="flex items-center gap-3 sm:block">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-verde-suave text-3xl sm:mx-auto sm:h-16 sm:w-16">
+            <div className="flex min-w-0 items-center gap-3 sm:block">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-verde-suave text-3xl sm:mx-auto sm:h-16 sm:w-16">
                 {plato.emoji}
               </span>
-              <h3 className="font-serif text-xl font-semibold text-verde sm:mt-3 sm:text-center">
+              <h3 className="min-w-0 font-serif text-xl font-semibold text-verde sm:mt-3 sm:text-center">
                 {plato.nombre}
               </h3>
             </div>
 
-            <ul className="grid gap-2.5 sm:grid-cols-2">
+            <ul className="grid min-w-0 gap-2.5 sm:grid-cols-2">
               {items.map((p) => (
-                <li key={p.id}>
+                <li key={p.id} className="min-w-0">
                   <Link
                     href={`/catalogo/${p.slug}`}
                     className="flex items-center gap-3 rounded-xl border border-crema-oscuro px-3.5 py-2.5 transition-colors hover:border-verde"

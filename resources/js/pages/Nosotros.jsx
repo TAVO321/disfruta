@@ -147,17 +147,17 @@ export default function Nosotros() {
           <div className="relative">
             <div className="grid grid-cols-2 gap-4">
               {[
-                { n: 'Ing.', t: 'en alimentos', c: 'bg-verde text-crema' },
-                { n: '100%', t: 'recetas propias', c: 'bg-dorado text-verde' },
-                { n: 'Lote', t: 'rastreable', c: 'bg-verde-medio text-crema' },
-                { n: '0', t: 'conservantes de más', c: 'bg-rojo text-crema' },
+                { n: 'Ing.', t: 'en alimentos', fondo: 'bg-verde', texto: 'text-crema' },
+                { n: '100%', t: 'recetas propias', fondo: 'bg-dorado', texto: 'text-verde' },
+                { n: 'Lote', t: 'rastreable', fondo: 'bg-verde-medio', texto: 'text-crema' },
+                { n: '0', t: 'conservantes de más', fondo: 'bg-rojo', texto: 'text-crema' },
               ].map((x) => (
                 <div
                   key={x.t}
-                  className="rounded-2xl border border-crema-profundo bg-white p-6 text-center shadow-suave"
+                  className={`rounded-2xl border border-crema-profundo p-6 text-center shadow-suave ${x.fondo}`}
                 >
-                  <p className={`font-serif text-3xl font-bold ${x.c.split(' ')[1]}`}>{x.n}</p>
-                  <p className="mt-1 text-xs tracking-wide text-tinta-suave uppercase">{x.t}</p>
+                  <p className={`font-serif text-3xl font-bold ${x.texto}`}>{x.n}</p>
+                  <p className="mt-1 text-xs tracking-wide uppercase opacity-80">{x.t}</p>
                 </div>
               ))}
             </div>

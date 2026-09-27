@@ -39,12 +39,39 @@ export function mensajeWhatsApp(items, total, datos, numeroWhatsapp) {
   return encodeURIComponent(cuerpo)
 }
 
-export function linkWhatsApp(texto, numeroWhatsapp) {
-  const numero = String(numeroWhatsapp ?? '').replace(/\D/g, '')
-  // Sin numero configurado no hay enlace valido: se devuelve null para que el
+/**
+ * Normaliza un telefono para wa.me asumiendo Bolivia como destino habitual.
+ * Acepta 70123456, 070123456, +591 70123456 o 59170123456 y siempre devuelve
+ * el numero con codigo de pais. Devuelve null si no hay digitos utilizables.
+ */
+export function telefonoWhatsApp(numero, prefijo = '591') {
+  const digitos = String(numero ?? '').replace(/\D/g, '')
+
+  if (!digitos) return null
+
+  // Ya viene con codigo de pais: se respeta tal cual.
+  if (digitos.startsWith(prefijo)) return digitos
+
+  // Formato local: se descarta el 0 inicial y se antepone el prefijo.
+  const local = digitos.replace(/^0+/, '')
+
+  if (!local) return null
+
+  return prefijo + local
+}
+
+/**
+ * Arma el enlace de wa.me. Ojo con el orden: primero el TEXTO (ya codificado
+ * con encodeURIComponent) y despues el NUMERO de destino.
+ */
+export function linkWhatsApp(texto, numero) {
+  const destino = telefonoWhatsApp(numero)
+
+  // Sin numero utilizable no hay enlace valido: se devuelve null para que el
   // llamador oculte el boton en vez de generar un wa.me roto.
-  if (!numero) return null
-  return `https://wa.me/${numero}?text=${texto}`
+  if (!destino) return null
+
+  return `https://wa.me/${destino}?text=${texto}`
 }
 
 export function mensajeConsultaSimple(asunto) {

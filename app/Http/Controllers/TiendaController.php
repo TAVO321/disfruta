@@ -82,12 +82,30 @@ class TiendaController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $niveles = NivelPicante::ids();
+        $niveles = NivelPicante::todos();
+        $listaPlatos = Platos::todos();
+
+        // Los conteos de facetas se resuelven con una consulta por tipo en vez
+        // de una por cada valor, para no crecer con el catalogo.
+        $conteosPorNivel = Producto::activos()
+            ->selectRaw('nivel_picante, COUNT(*) as total')
+            ->groupBy('nivel_picante')
+            ->pluck('total', 'nivel_picante');
+
+        $conteosPorPlato = Producto::activos()
+            ->whereNotNull('platos_recomendados')
+            ->pluck('platos_recomendados')
+            ->flatMap(fn ($lista) => $lista ?? [])
+            ->countBy();
+
+        $precios = Producto::activos()
+            ->selectRaw('MIN(precio) as minimo, MAX(precio) as maximo')
+            ->first();
 
         return Inertia::render('Catalogo/Index', [
             'productos' => ProductoResource::collection($productos),
-            'platos' => Platos::todos(),
-            'niveles' => NivelPicante::todos(),
+            'platos' => $listaPlatos,
+            'niveles' => $niveles,
             'filtros' => [
                 'q' => $buscar,
                 'categoria' => $categoria,
@@ -98,8 +116,8 @@ class TiendaController extends Controller
                 'orden' => $orden,
             ],
             'precios' => [
-                'min' => (float) ($base->min('precio') ?? 0),
-                'max' => (float) ($base->max('precio') ?? 1),
+                'min' => (float) ($precios->minimo ?? 0),
+                'max' => (float) ($precios->maximo ?? 1),
             ],
             'conteos' => [
                 'total' => (clone $base)->count(),
@@ -110,11 +128,11 @@ class TiendaController extends Controller
                     ->map(fn ($c) => ['slug' => $c->slug, 'nombre' => $c->nombre, 'total' => $c->productos_count]),
                 'picantes' => collect($niveles)
                     ->mapWithKeys(fn ($nivel) => [
-                        $nivel => (clone $base)->where('nivel_picante', $nivel)->count(),
+                        $nivel['id'] => (int) ($conteosPorNivel[$nivel['id']] ?? 0),
                     ]),
-                'platos' => collect(Platos::todos())
+                'platos' => collect($listaPlatos)
                     ->mapWithKeys(fn ($plato) => [
-                        $plato['id'] => (clone $base)->whereJsonContains('platos_recomendados', $plato['id'])->count(),
+                        $plato['id'] => (int) ($conteosPorPlato[$plato['id']] ?? 0),
                     ])
                     ->filter(fn ($n) => $n > 0),
             ],

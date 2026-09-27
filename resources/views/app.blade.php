@@ -14,7 +14,9 @@
     @inertiaHead
   </head>
   <body class="bg-crema text-tinta antialiased">
+    {{-- @inertia ya emite su propio div#app junto con el payload inicial.
+         Agregar otro aqui dejaba dos elementos con el mismo id y React
+         montaba en el primero, dejando el segundo huerfano. --}}
     @inertia
-    <div id="app"></div>
   </body>
 </html>

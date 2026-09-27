@@ -52,7 +52,9 @@ export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_pro
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      {/* La columna implicita `auto` tomaba el min-content de las tarjetas (mas
+          ancho que el viewport) y desbordaba la pagina en 320px. */}
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <TarjetaAdmin
           titulo="Últimos pedidos"
           subtitulo="Los 6 pedidos más recientes"
@@ -72,21 +74,33 @@ export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_pro
               {pedidos.map((p) => (
                 <li
                   key={p.id}
-                  className="flex flex-wrap items-center gap-3 rounded-xl border border-crema-oscuro px-3.5 py-2.5"
+                  className="rounded-xl border border-crema-oscuro px-3.5 py-2.5"
                 >
-                  <span className="font-serif text-sm font-bold text-verde">#{p.id}</span>
-                  <span className="min-w-0 flex-1 truncate text-sm text-tinta">{p.cliente}</span>
-                  <span
-                    className={`eyebrow rounded-full px-2.5 py-0.5 ${TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'}`}
-                  >
-                    {NOMBRE_ESTADO[p.estado] ?? p.estado}
-                  </span>
-                  <span className="font-serif text-sm font-semibold text-verde">
-                    {precio(p.total)}
-                  </span>
-                  <span className="w-full text-[0.7rem] text-tinta-suave sm:w-auto">
-                    {fecha(p.creado)}
-                  </span>
+                  {/* Movil: filas apiladas. En una sola linea el nombre quedaba
+                      aplastado entre el id, el estado y el total. */}
+                  <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                    <div className="flex items-center justify-between gap-2 sm:contents">
+                      <span className="font-serif text-sm font-bold text-verde sm:order-1">
+                        #{p.id}
+                      </span>
+                      <span
+                        className={`eyebrow shrink-0 rounded-full px-2.5 py-0.5 sm:order-3 ${
+                          TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'
+                        }`}
+                      >
+                        {NOMBRE_ESTADO[p.estado] ?? p.estado}
+                      </span>
+                    </div>
+                    <span className="min-w-0 text-sm text-tinta sm:order-2 sm:flex-1 sm:truncate">
+                      {p.cliente}
+                    </span>
+                    <span className="font-serif text-sm font-semibold text-verde sm:order-4">
+                      {precio(p.total)}
+                    </span>
+                    <span className="text-[0.7rem] text-tinta-suave sm:order-5 sm:w-auto">
+                      {fecha(p.creado)}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -112,13 +126,13 @@ export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_pro
           ) : (
             <ul className="space-y-2.5">
               {stock_critico.map((p) => (
-                <li key={p.id} className="flex items-center gap-3">
-                  <span className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-crema-oscuro">
+                <li key={p.id} className="flex items-center gap-2.5 sm:gap-3">
+                  <span className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-crema-oscuro sm:h-11 sm:w-11">
                     <ImagenProducto producto={p} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-verde">{p.nombre}</span>
-                    <span className="text-xs text-tinta-suave">
+                    <span className="text-[0.7rem] text-tinta-suave sm:text-xs">
                       Mínimo: {p.stockMinimo} unidades
                     </span>
                   </span>

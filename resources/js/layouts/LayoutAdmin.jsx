@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, router, usePage } from '@inertiajs/react'
+import { Flash } from '@/components/Flash'
 import {
   IconoCerrar,
   IconoEtiqueta,
@@ -7,6 +8,7 @@ import {
   IconoLote,
   IconoMenu,
   IconoPanel,
+  IconoUsuarioGrupo,
 } from '@/components/Iconos'
 
 const SECCIONES = [
@@ -18,12 +20,17 @@ const SECCIONES = [
   { ruta: '/admin/clientes', texto: 'Clientes', icono: IconoPanel },
 ]
 
+const SECCIONES_SISTEMA = [
+  { ruta: '/admin/usuarios', texto: 'Administradores', icono: IconoUsuarioGrupo },
+  { ruta: '/admin/ajustes', texto: 'Ajustes', icono: IconoEtiqueta },
+]
+
 export function TarjetaAdmin({ titulo, subtitulo, accion, children }) {
   return (
     <section className="rounded-2xl border border-crema-profundo bg-white shadow-suave">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-crema-oscuro px-5 py-4">
         <div>
-          <h2 className="font-serif text-xl font-semibold text-verde">{titulo}</h2>
+          {titulo && <h2 className="font-serif text-xl font-semibold text-verde">{titulo}</h2>}
           {subtitulo && <p className="mt-0.5 text-xs text-tinta-suave">{subtitulo}</p>}
         </div>
         {accion}
@@ -48,6 +55,32 @@ export default function LayoutAdmin({ children }) {
 
   const enlaces = (movil) =>
     SECCIONES.map((s) => {
+      const esActivo = activo(s.ruta, s.exacto)
+      const clases = movil
+        ? `flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-sm ${
+            esActivo ? 'bg-crema font-semibold text-verde' : 'text-crema/75'
+          }`
+        : `flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm transition-colors ${
+            esActivo
+              ? 'bg-crema font-semibold text-verde'
+              : 'text-crema/70 hover:bg-crema/10 hover:text-crema'
+          }`
+
+      return (
+        <Link
+          key={s.ruta}
+          href={s.ruta}
+          onClick={movil ? () => setAbierto(false) : undefined}
+          className={clases}
+        >
+          <s.icono width={17} height={17} />
+          {s.texto}
+        </Link>
+      )
+    })
+
+  const enlacesSistema = (movil) =>
+    SECCIONES_SISTEMA.map((s) => {
       const esActivo = activo(s.ruta, s.exacto)
       const clases = movil
         ? `flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-sm ${
@@ -102,6 +135,10 @@ export default function LayoutAdmin({ children }) {
 
           <nav className="scrollbar-slim flex-1 space-y-0.5 overflow-y-auto p-3">
             {enlaces(false)}
+            <p className="mt-5 px-3.5 pb-1.5 text-[0.6rem] tracking-[0.15em] text-crema/40 uppercase">
+              Sistema
+            </p>
+            {enlacesSistema(false)}
           </nav>
 
           <div className="border-t border-crema/12 p-3">
@@ -135,7 +172,10 @@ export default function LayoutAdmin({ children }) {
             <span className="text-xs text-tinta-suave">Panel admin</span>
           </header>
 
-          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="p-4 sm:p-6 lg:p-8">
+            <Flash />
+            {children}
+          </div>
         </div>
       </div>
 
@@ -147,8 +187,8 @@ export default function LayoutAdmin({ children }) {
             onClick={() => setAbierto(false)}
             className="animar-aparece absolute inset-0 bg-tinta/50"
           />
-          <nav className="animar-desliza absolute inset-y-0 left-0 w-64 bg-verde p-3 text-crema">
-            <div className="mb-3 flex items-center justify-between px-2 py-2">
+          <nav className="animar-desliza-lateral absolute inset-y-0 left-0 flex w-64 flex-col bg-verde text-crema">
+            <div className="mb-1 flex items-center justify-between px-2 py-2">
               <span className="font-serif font-bold tracking-[0.14em]">DISFRUTA</span>
               <button
                 type="button"
@@ -159,7 +199,33 @@ export default function LayoutAdmin({ children }) {
                 <IconoCerrar />
               </button>
             </div>
-            {enlaces(true)}
+
+            <div className="scrollbar-slim min-h-0 flex-1 space-y-0.5 overflow-y-auto p-3 pt-1">
+              {enlaces(true)}
+              <p className="mt-5 px-3.5 pb-1.5 text-[0.6rem] tracking-[0.15em] text-crema/40 uppercase">
+                Sistema
+              </p>
+              {enlacesSistema(true)}
+            </div>
+
+            {/* El drawer movil no heredaba estas acciones del aside de escritorio:
+                en el celular no habia forma de volver a la web ni de salir. */}
+            <div className="border-t border-crema/12 p-3">
+              <Link
+                href="/"
+                onClick={() => setAbierto(false)}
+                className="flex items-center justify-center gap-2 rounded-xl border border-crema/25 py-2.5 text-xs font-semibold tracking-wide text-crema/80 uppercase transition-colors hover:border-dorado hover:text-dorado-claro"
+              >
+                Ver la web
+              </Link>
+              <button
+                type="button"
+                onClick={salir}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold tracking-wide text-crema/55 uppercase transition-colors hover:bg-crema/10 hover:text-dorado-claro"
+              >
+                Cerrar sesión
+              </button>
+            </div>
           </nav>
         </div>
       )}

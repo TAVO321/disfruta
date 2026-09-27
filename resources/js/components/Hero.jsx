@@ -42,8 +42,11 @@ export function Hero({ destacados }) {
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 -right-24 h-105 w-105 rounded-full bg-dorado-suave/60 blur-3xl" />
-        <div className="absolute -bottom-40 -left-32 h-130 w-130 rounded-full bg-verde-suave/70 blur-3xl" />
+        {/* El desenfoque se repinta en cada frame de la flotacion. Un radio de
+            520px con blur-3xl es mas caro que el viewport de un celular, asi que
+            arranca chico y crece en pantallas grandes. */}
+        <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-dorado-suave/60 blur-2xl sm:-top-32 sm:-right-24 sm:h-105 sm:w-105 sm:blur-3xl" />
+        <div className="absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-verde-suave/70 blur-2xl sm:-bottom-40 sm:-left-32 sm:h-130 sm:w-130 sm:blur-3xl" />
       </div>
 
       <div className="container-disfruta grid items-center gap-14 py-16 lg:grid-cols-2 lg:gap-10 lg:py-24">
@@ -172,10 +175,8 @@ function EscenaProductos({ principales, acompanante }) {
       ))}
 
       {acompanante && (
-        <div className="animar-brillo absolute top-4 right-2 w-20 overflow-hidden rounded-2xl border-2 border-white bg-white shadow-media [animation-delay:-1.4s] sm:w-24">
-          <div className="aspect-square">
-            <IlustracionFrasco producto={acompanante} className="h-full w-full" />
-          </div>
+        <div className="animar-brillo absolute top-[2%] right-[2%] aspect-square w-[16%] overflow-hidden rounded-2xl border-2 border-white bg-white shadow-media [animation-delay:-1.4s]">
+          <IlustracionFrasco producto={acompanante} className="h-full w-full" />
         </div>
       )}
 
@@ -186,26 +187,35 @@ function EscenaProductos({ principales, acompanante }) {
 }
 
 function FrascoHero({ producto, posicion }) {
+  // Todo se posiciona en porcentajes sobre el cuadrado del escenario, no en
+  // pixeles. Asi la composicion se mantiene proporcional en cualquier ancho: con
+  // anchos fijos los tres frascos sumaban 480px sobre los ~335px de un celular
+  // y se pisaban entre si.
   const estilos = [
-    'left-2 top-16 w-40 sm:left-6 sm:w-48',
-    'left-1/2 top-8 w-44 -translate-x-1/2 sm:w-52',
-    'right-2 top-24 w-36 sm:right-6 sm:w-44',
+    'left-[4%] top-[11%] w-[33%]',
+    'left-1/2 top-[6%] w-[36%] -translate-x-1/2',
+    'right-[4%] top-[17%] w-[31%]',
   ]
   const inclinaciones = ['-rotate-6', 'rotate-0', 'rotate-7']
   const flotacion = ['animar-brillo', '', 'animar-brillo [animation-delay:-2.2s]']
 
   return (
+    // La entrada (animar-desliza) y la flotacion (animar-brillo) animan las dos
+    // `transform`, y en CSS gana la ultima regla aplicada: en el mismo elemento
+    // una anula a la otra. Por eso van en envoltorios separados.
     <div
-      className={`animar-desliza absolute origin-bottom ${estilos[posicion]} ${inclinaciones[posicion]} ${flotacion[posicion]}`}
+      className={`animar-desliza absolute origin-bottom ${estilos[posicion]} ${inclinaciones[posicion]}`}
     >
-      <div className="overflow-hidden rounded-[1.5rem] border-2 border-white bg-white shadow-flotante">
-        <div className="aspect-3/4">
-          <ImagenProducto producto={producto} />
+      <div className={flotacion[posicion]}>
+        <div className="overflow-hidden rounded-[1.5rem] border-2 border-white bg-white shadow-flotante">
+          <div className="aspect-3/4">
+            <ImagenProducto producto={producto} />
+          </div>
         </div>
+        <p className="mt-2 line-clamp-2 text-center font-serif text-[0.7rem] leading-tight font-semibold text-balance text-verde min-[380px]:text-xs">
+          {producto.nombre}
+        </p>
       </div>
-      <p className="mt-2.5 text-center font-serif text-[0.7rem] leading-tight font-semibold text-verde sm:text-xs">
-        {producto.nombre}
-      </p>
     </div>
   )
 }
