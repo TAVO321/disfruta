@@ -452,3 +452,17 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (12,'2026_09_26_000
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (13,'2026_09_27_191358_completa_el_tono_de_los_productos_sin_paleta',2);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (16,'2026_09_27_202233_crear_catalagos_de_la_base',3);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (17,'2026_09_27_202234_agrega_el_tono_a_las_categorias',3);
+
+-- ---------------------------------------------------------------------------
+-- Administrador
+--
+-- La base se importa vacia, pero sin esta cuenta no se puede entrar al panel.
+-- Es la unica fila de datos que trae este archivo, y es de desarrollo:
+--
+--     admin@disfruta.bo  /  disfruta-dev-2026
+--
+-- Cambiala apenas la uses en cualquier entorno real.
+-- ---------------------------------------------------------------------------
+
+INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `is_admin`, `created_at`, `updated_at`) VALUES
+(1, 'Administrador', 'admin@disfruta.bo', NULL, '$2y$12$iYz5axl.OCPSAVJFJt13DO9hvPx/Ami6EOHxkUheqjUp5/HhO/zti', NULL, 1, '2026-09-27 12:00:00', '2026-09-27 12:00:00');
