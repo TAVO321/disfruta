@@ -265,6 +265,51 @@ class PanelAdminTest extends TestCase
         Storage::disk('public')->assertExists($producto->imagenes->first()->ruta);
     }
 
+    public function test_editar_un_producto_con_imagen_actualiza_los_datos_y_guarda_el_archivo(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->admin);
+
+        $producto = Producto::firstOrFail();
+
+        $this->patch("/admin/productos/{$producto->id}", [
+            'nombre' => $producto->nombre,
+            'categoria_id' => $producto->categoria_id,
+            'descripcion_corta' => 'Descripcion corta editada.',
+            'descripcion' => 'Descripcion completa editada con suficiente largo.',
+            'precio' => 30,
+            'presentacion' => $producto->presentacion,
+            'nivel_picante' => $producto->nivel_picante,
+            'stock' => $producto->stock,
+            'stock_minimo' => $producto->stock_minimo,
+            'peso' => $producto->peso,
+            'ingredientes' => ['ajo'],
+            'platos_recomendados' => ['parrillada'],
+            'activo' => '1',
+            'imagenes' => [UploadedFile::fake()->image('editada.jpg')],
+        ])->assertSessionHasNoErrors();
+
+        $producto->refresh();
+
+        $this->assertSame(30.0, (float) $producto->precio);
+        Storage::disk('public')->assertExists($producto->imagenes->sole()->ruta);
+    }
+
+    public function test_la_ruta_de_editar_un_producto_rechaza_un_post(): void
+    {
+        $this->actingAs($this->admin);
+
+        $producto = Producto::firstOrFail();
+
+        // El formulario mandaba POST con un _method en el cuerpo. Inertia
+        // serializa ese cuerpo como JSON, el _method no llega, y la ruta
+        // respondia 405 en vez de editar. El update tiene que ir por el verbo.
+        $this->post("/admin/productos/{$producto->id}", [
+            'nombre' => 'No deberia guardarse',
+        ])->assertStatus(405);
+    }
+
     public function test_actualizar_el_stock_desde_el_panel_recalcula_el_stock_del_producto(): void
     {
         $this->actingAs($this->admin);

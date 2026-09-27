@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Head, Link, useForm, usePage } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { ImagenProducto } from '@/components/ProductoUI'
@@ -30,9 +30,9 @@ const CAMPOS_VACIOS = {
 export default function ProductosForm({ producto, categorias }) {
   const { niveles, platos } = usePage().props
   const editando = Boolean(producto)
-  const archivoRef = useRef(null)
+  const [vistasPrevias, setVistasPrevias] = useState([])
 
-  const { data, setData, post, processing, errors } = useForm({
+  const { data, setData, post, patch, processing, errors } = useForm({
     ...CAMPOS_VACIOS,
     ...(producto
       ? {
@@ -59,10 +59,20 @@ export default function ProductosForm({ producto, categorias }) {
           activo: producto.activo,
         }
       : {}),
+    imagenes: [],
     imagenes_eliminadas: [],
   })
 
   const [nuevoIngrediente, setNuevoIngrediente] = useState('')
+
+  useEffect(() => {
+    const archivos = data.imagenes ?? []
+    const urls = archivos.map((f) => URL.createObjectURL(f))
+    setVistasPrevias(urls)
+
+    return () => urls.forEach((u) => URL.revokeObjectURL(u))
+  }, [data.imagenes])
+
   const toggle = (campo, valor) =>
     setData(
       campo,
@@ -73,19 +83,13 @@ export default function ProductosForm({ producto, categorias }) {
 
   const guardar = (e) => {
     e.preventDefault()
-    const fd = new FormData()
-    Object.entries(data).forEach(([k, v]) => {
-      if (Array.isArray(v)) v.forEach((x) => fd.append(`${k}[]`, x))
-      else if (typeof v === 'boolean') fd.append(k, v ? '1' : '0')
-      else fd.append(k, v ?? '')
-    })
-    if (archivoRef.current?.files?.length) {
-      Array.from(archivoRef.current.files).forEach((f) => fd.append('imagenes[]', f))
-    }
-    // Inertia manda POST: la ruta update es PUT, asi que va spoofeada en el body.
-    if (editando) fd.append('_method', 'PUT')
 
-    post(editando ? `/admin/productos/${producto.id}` : '/admin/productos', fd)
+    // Los archivos van dentro de data y es Inertia quien arma el cuerpo
+    // multipart. Armar el FormData a mano y pasarlo a post/patch lo mandaba
+    // como JSON: la ruta update respondia 405 y los archivos se perdian en el
+    // camino, por mas que el formulario los mostrara.
+    if (editando) patch(`/admin/productos/${producto.id}`)
+    else post('/admin/productos')
   }
 
   return (
@@ -415,12 +419,22 @@ export default function ProductosForm({ producto, categorias }) {
             )}
 
             <input
-              ref={archivoRef}
               type="file"
+              name="imagenes[]"
               accept="image/jpeg,image/png,image/webp"
               multiple
+              onChange={(e) => setData('imagenes', Array.from(e.target.files ?? []))}
               className="block w-full text-xs text-tinta-suave file:mr-3 file:rounded-full file:border-0 file:bg-verde file:px-3.5 file:py-2 file:text-xs file:font-semibold file:text-crema hover:file:bg-verde-medio"
             />
+            {vistasPrevias.length > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {vistasPrevias.map((url) => (
+                  <li key={url} className="h-16 w-16 overflow-hidden rounded-lg border border-crema-profundo">
+                    <img src={url} alt="Vista previa" className="h-full w-full object-cover" />
+                  </li>
+                ))}
+              </ul>
+            )}
             {errors.imagenes && <p className="mt-1.5 text-xs text-rojo">{errors.imagenes}</p>}
           </TarjetaAdmin>
 
