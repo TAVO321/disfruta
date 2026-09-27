@@ -36,6 +36,15 @@ export function CarritoLateral({ abierto, onCerrar }) {
   const enviar = () => {
     setEnviando(true)
 
+    // La pestaña se abre aca, en el clic, porque despues el navegador la
+    // bloquea: window.open fuera del gesto del usuario no sirve. Todavia no
+    // lleva a ningun lado; se completa recien cuando el servidor confirmo que
+    // el pedido existe. Antes se abria WhatsApp siempre, hayalado o no el
+    // pedido, y el cliente mandaba un mensaje que nadie recibia.
+    const pestana = whatsapp ? window.open('', '_blank') : null
+
+    if (pestana) pestana.opener = null
+
     router.post(
       '/carrito/confirmar',
       {
@@ -51,23 +60,27 @@ export function CarritoLateral({ abierto, onCerrar }) {
       },
       {
         preserveScroll: true,
-        onSuccess: () => vaciar(),
-        onError: () => setEnviando(false),
+        onSuccess: () => {
+          if (pestana) {
+            const texto = mensajeWhatsApp(
+              items.map((i) => ({ producto: i, cantidad: i.cantidad, reserva: i.reserva })),
+              total,
+              form,
+              whatsapp,
+            )
+            pestana.location = linkWhatsApp(texto, whatsapp)
+          }
+
+          vaciar()
+          cerrar()
+        },
+        onError: () => {
+          pestana?.close()
+          setEnviando(false)
+        },
         onFinish: () => setEnviando(false),
       },
     )
-
-    if (whatsapp) {
-      const texto = mensajeWhatsApp(
-        items.map((i) => ({ producto: i, cantidad: i.cantidad, reserva: i.reserva })),
-        total,
-        form,
-        whatsapp,
-      )
-      window.open(linkWhatsApp(texto, whatsapp), '_blank', 'noopener')
-    }
-
-    cerrar()
   }
 
   const vacio = items.length === 0

@@ -7,6 +7,7 @@ use App\Models\Producto;
 use App\Models\Promocion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -45,7 +46,7 @@ class PaginasPublicasTest extends TestCase
     {
         $valor = $props[$clave] ?? null;
 
-        if ($valor instanceof \Illuminate\Support\Collection) {
+        if ($valor instanceof Collection) {
             $valor = $valor->all();
         }
 
@@ -147,6 +148,33 @@ class PaginasPublicasTest extends TestCase
         $this->assertSame($stockInicial - 2, $producto->fresh()->stock);
         $this->assertSame($restanteInicial - 2, $loteProximo->fresh()->restante);
         $this->assertSame($lotesTotales - 2, (int) $producto->lotes()->sum('restante'));
+    }
+
+    public function test_se_puede_confirmar_un_pedido_de_un_producto_sin_lotes_registrados(): void
+    {
+        $producto = Producto::where('activo', true)->where('stock', '>', 2)->firstOrFail();
+
+        // Un producto cargado desde el panel nace con stock pero sin lotes: nadie
+        // registro inventario fisico para el. Igual tiene que poder venderse, o
+        // el checkout responde 422 y el cliente se queda sin pedido.
+        $producto->lotes()->delete();
+        $producto->update(['stock' => 5]);
+
+        $response = $this->post('/carrito/confirmar', [
+            'cliente' => 'Cliente Test',
+            'telefono' => '70000002',
+            'zona' => 'Zona Sur',
+            'items' => [
+                ['producto_id' => $producto->id, 'cantidad' => 2, 'reserva' => false],
+            ],
+        ]);
+
+        $this->assertNotSame(422, $response->getStatusCode(), 'Un producto sin lotes no puede dejar el checkout en 422.');
+
+        $pedido = Pedido::where('telefono', '70000002')->latest('id')->firstOrFail();
+
+        $this->assertSame(2, $pedido->items->sum('cantidad'));
+        $this->assertSame(3, $producto->fresh()->stock);
     }
 
     public function test_la_pagina_de_confirmacion_solo_muestra_el_pedido_de_esta_sesion(): void

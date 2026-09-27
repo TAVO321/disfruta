@@ -28,7 +28,8 @@ class CarritoController extends Controller
             'items.*.reserva' => ['required', 'boolean'],
         ]);
 
-        $pedido = DB::transaction(function () use ($datos) {            $productos = Producto::whereIn('id', collect($datos['items'])->pluck('producto_id'))
+        $pedido = DB::transaction(function () use ($datos) {
+            $productos = Producto::whereIn('id', collect($datos['items'])->pluck('producto_id'))
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
@@ -122,18 +123,29 @@ class CarritoController extends Controller
      * FIFO (primero el que vence antes). Si no se descontaran los lotes, el
      * recalculo que hace el panel al editar un lote repondria las unidades ya
      * vendidas.
+     *
+     * Un producto puede no tener ningun lote registrado: los que se cargan
+     * desde el panel nacen con stock pero sin inventario fisico, y tampoco los
+     * productos de promocion. En ese caso no hay nada que consumir y la venta
+     * sigue igual: solo baja el stock del producto. Antes esto abortaba con un
+     * 422 y el cliente se quedaba sin pedido.
      */
     private function descontarStock(Producto $producto, int $cantidad): void
     {
         $producto->decrement('stock', $cantidad);
 
-        $pendiente = $cantidad;
         $lotes = Lote::where('producto_id', $producto->id)
             ->where('restante', '>', 0)
             ->orderBy('fecha_consumo_recomendado')
             ->orderBy('id')
             ->lockForUpdate()
             ->get();
+
+        if ($lotes->isEmpty()) {
+            return;
+        }
+
+        $pendiente = $cantidad;
 
         foreach ($lotes as $lote) {
             if ($pendiente <= 0) {
@@ -145,8 +157,9 @@ class CarritoController extends Controller
             $pendiente -= $tomado;
         }
 
-        // Si los lotes no cubren la venta, el stock del producto y el inventario
-        // fisico quedarian desfasados: se revierte toda la transaccion.
+        // Si los lotes registrados no cubren la venta, el stock del producto y el
+        // inventario fisico quedarian desfasados: se revierte toda la
+        // transaccion. Solo aplica cuando el producto si tiene lotes.
         if ($pendiente > 0) {
             abort(422, "No hay lotes suficientes de {$producto->nombre}.");
         }
