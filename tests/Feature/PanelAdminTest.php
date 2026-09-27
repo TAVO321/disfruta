@@ -268,6 +268,40 @@ class PanelAdminTest extends TestCase
         Storage::disk('public')->assertExists($producto->imagenes->first()->ruta);
     }
 
+    public function test_las_imagenes_subidas_se_guardan_como_webp_reducidas(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->admin);
+
+        $this->post('/admin/productos', [
+            'nombre' => 'Ajo Imagen Test',
+            'categoria_id' => Categoria::firstOrFail()->id,
+            'descripcion_corta' => 'Descripcion corta de prueba.',
+            'descripcion' => 'Descripcion completa de prueba con suficiente largo.',
+            'precio' => 25,
+            'presentacion' => 'Frasco 200 g',
+            'nivel_picante' => 'suave',
+            'stock' => 0,
+            'stock_minimo' => 2,
+            'peso' => 200,
+            'ingredientes' => ['ajo'],
+            'platos_recomendados' => ['parrillada'],
+            'activo' => '1',
+            'imagenes' => [UploadedFile::fake()->image('grande.png', 2000, 2000)],
+        ])->assertSessionHasNoErrors();
+
+        $ruta = Producto::where('nombre', 'Ajo Imagen Test')->firstOrFail()->imagenes->sole()->ruta;
+
+        $this->assertStringEndsWith('.webp', $ruta);
+
+        $info = getimagesizefromstring(Storage::disk('public')->get($ruta));
+
+        $this->assertSame('image/webp', $info['mime']);
+        $this->assertSame(1200, $info[0]);
+        $this->assertSame(1200, $info[1]);
+    }
+
     public function test_editar_un_producto_con_imagen_actualiza_los_datos_y_guarda_el_archivo(): void
     {
         Storage::fake('public');

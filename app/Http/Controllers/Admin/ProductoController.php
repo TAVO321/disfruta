@@ -11,12 +11,25 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\ImageManager;
 
 class ProductoController extends Controller
 {
+    /**
+     * Los frascos se muestran como mucho a 600 px de ancho, asi que 1200 deja
+     * margen para pantallas retina sin guardar los varios megas que suelen
+     * subir las fotos de celular.
+     */
+    private const IMAGEN_LADO_MAXIMO = 1200;
+
+    private const IMAGEN_CALIDAD = 82;
+
     public function index(Request $request): Response
     {
         $buscar = $request->string('q')->trim()->value();
@@ -199,10 +212,17 @@ class ProductoController extends Controller
             return;
         }
 
+        $gestor = new ImageManager(new GdDriver);
         $orden = $producto->imagenes()->count();
 
         foreach ($request->file('imagenes') as $archivo) {
-            $ruta = $archivo->store('productos', 'public');
+            $webp = $gestor->decodePath($archivo->getRealPath())
+                ->orient()
+                ->scaleDown(width: self::IMAGEN_LADO_MAXIMO, height: self::IMAGEN_LADO_MAXIMO)
+                ->encode(new WebpEncoder(quality: self::IMAGEN_CALIDAD));
+
+            $ruta = 'productos/'.Str::random(40).'.webp';
+            Storage::disk('public')->put($ruta, $webp->toString());
 
             $producto->imagenes()->create([
                 'ruta' => $ruta,
