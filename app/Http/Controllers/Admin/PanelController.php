@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PedidoResource;
 use App\Http\Resources\ProductoResource;
 use App\Models\Cliente;
+use App\Models\EstadoPedido;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Promocion;
@@ -36,6 +37,7 @@ class PanelController extends Controller
             'ultimos_pedidos' => PedidoResource::collection(
                 Pedido::with('items')->latest()->limit(6)->get()
             ),
+            'estadosPedido' => EstadoPedido::catalogo(),
             'stock_critico' => ProductoResource::collection($stockCritico),
             'top_productos' => DB::table('pedido_items')
                 ->join('pedidos', 'pedidos.id', '=', 'pedido_items.pedido_id')

@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { Head, Link, usePage } from '@inertiajs/react'
 import { IconoCheck, IconoFlecha, IconoWhatsapp } from '@/components/Iconos'
-import { useCarrito } from '@/context/Carrito'
+import { useCarritoAcciones } from '@/context/Carrito'
 import { fecha, precio } from '@/lib/config'
 import { linkWhatsApp } from '@/lib/whatsapp'
 
 export default function Confirmado({ pedido }) {
-  const { vaciar } = useCarrito()
+  const { vaciar } = useCarritoAcciones()
   const { ajustes } = usePage().props
 
   // El pedido ya quedo registrado en la base: el carrito local se descarta.

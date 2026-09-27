@@ -186,30 +186,32 @@ function EscenaProductos({ principales, acompanante }) {
   )
 }
 
+const ESTILOS_FRASCO = [
+  'left-[4%] top-[11%] w-[33%]',
+  'left-1/2 top-[6%] w-[36%] -translate-x-1/2',
+  'right-[4%] top-[17%] w-[31%]',
+]
+
+const INCLINACIONES_FRASCO = ['-rotate-6', 'rotate-0', 'rotate-7']
+
+const FLOTACION_FRASCO = ['animar-brillo', '', 'animar-brillo [animation-delay:-2.2s]']
+
 function FrascoHero({ producto, posicion }) {
   // Todo se posiciona en porcentajes sobre el cuadrado del escenario, no en
   // pixeles. Asi la composicion se mantiene proporcional en cualquier ancho: con
   // anchos fijos los tres frascos sumaban 480px sobre los ~335px de un celular
   // y se pisaban entre si.
-  const estilos = [
-    'left-[4%] top-[11%] w-[33%]',
-    'left-1/2 top-[6%] w-[36%] -translate-x-1/2',
-    'right-[4%] top-[17%] w-[31%]',
-  ]
-  const inclinaciones = ['-rotate-6', 'rotate-0', 'rotate-7']
-  const flotacion = ['animar-brillo', '', 'animar-brillo [animation-delay:-2.2s]']
-
   return (
     // La entrada (animar-desliza) y la flotacion (animar-brillo) animan las dos
     // `transform`, y en CSS gana la ultima regla aplicada: en el mismo elemento
     // una anula a la otra. Por eso van en envoltorios separados.
     <div
-      className={`animar-desliza absolute origin-bottom ${estilos[posicion]} ${inclinaciones[posicion]}`}
+      className={`animar-desliza absolute origin-bottom ${ESTILOS_FRASCO[posicion]} ${INCLINACIONES_FRASCO[posicion]}`}
     >
-      <div className={flotacion[posicion]}>
+      <div className={FLOTACION_FRASCO[posicion]}>
         <div className="overflow-hidden rounded-[1.5rem] border-2 border-white bg-white shadow-flotante">
           <div className="aspect-3/4">
-            <ImagenProducto producto={producto} />
+            <ImagenProducto producto={producto} prioritario />
           </div>
         </div>
         <p className="mt-2 line-clamp-2 text-center font-serif text-[0.7rem] leading-tight font-semibold text-balance text-verde min-[380px]:text-xs">

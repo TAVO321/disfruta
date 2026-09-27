@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link, router, usePage } from '@inertiajs/react'
 import { Flash } from '@/components/Flash'
 import {
@@ -22,7 +22,7 @@ const SECCIONES = [
 
 const SECCIONES_SISTEMA = [
   { ruta: '/admin/categorias', texto: 'Familias', icono: IconoEtiqueta },
-  { ruta: '/admin/catalogos', texto: 'Catálogos', icono: IconoEtiqueta },
+  { ruta: '/admin/catalogos', texto: 'CatÃ¡logos', icono: IconoEtiqueta },
   { ruta: '/admin/usuarios', texto: 'Administradores', icono: IconoUsuarioGrupo },
   { ruta: '/admin/ajustes', texto: 'Ajustes', icono: IconoEtiqueta },
 ]
@@ -55,34 +55,10 @@ export default function LayoutAdmin({ children }) {
 
   const salir = () => router.post('/admin/salir')
 
-  const enlaces = (movil) =>
-    SECCIONES.map((s) => {
-      const esActivo = activo(s.ruta, s.exacto)
-      const clases = movil
-        ? `flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-sm ${
-            esActivo ? 'bg-crema font-semibold text-verde' : 'text-crema/75'
-          }`
-        : `flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm transition-colors ${
-            esActivo
-              ? 'bg-crema font-semibold text-verde'
-              : 'text-crema/70 hover:bg-crema/10 hover:text-crema'
-          }`
-
-      return (
-        <Link
-          key={s.ruta}
-          href={s.ruta}
-          onClick={movil ? () => setAbierto(false) : undefined}
-          className={clases}
-        >
-          <s.icono width={17} height={17} />
-          {s.texto}
-        </Link>
-      )
-    })
-
-  const enlacesSistema = (movil) =>
-    SECCIONES_SISTEMA.map((s) => {
+  // El menu de escritorio y el drawer de movil comparten el mismo marcado: lo
+  // unico que cambia es el padding y si el enlace cierra el drawer.
+  const enlacesDe = (secciones, movil) =>
+    secciones.map((s) => {
       const esActivo = activo(s.ruta, s.exacto)
       const clases = movil
         ? `flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-sm ${
@@ -111,7 +87,7 @@ export default function LayoutAdmin({ children }) {
     <div className="min-h-screen bg-crema-oscuro/50">
       {auth?.user && (
         <div className="bg-verde px-4 py-1.5 text-center text-[0.7rem] text-crema/80">
-          Sesión de {auth.user.email}
+          SesiÃ³n de {auth.user.email}
         </div>
       )}
 
@@ -136,11 +112,11 @@ export default function LayoutAdmin({ children }) {
           </div>
 
           <nav className="scrollbar-slim flex-1 space-y-0.5 overflow-y-auto p-3">
-            {enlaces(false)}
+            {enlacesDe(SECCIONES, false)}
             <p className="mt-5 px-3.5 pb-1.5 text-[0.6rem] tracking-[0.15em] text-crema/40 uppercase">
               Sistema
             </p>
-            {enlacesSistema(false)}
+            {enlacesDe(SECCIONES_SISTEMA, false)}
           </nav>
 
           <div className="border-t border-crema/12 p-3">
@@ -155,7 +131,7 @@ export default function LayoutAdmin({ children }) {
               onClick={salir}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold tracking-wide text-crema/55 uppercase transition-colors hover:bg-crema/10 hover:text-dorado-claro"
             >
-              Cerrar sesión
+              Cerrar sesiÃ³n
             </button>
           </div>
         </aside>
@@ -166,7 +142,7 @@ export default function LayoutAdmin({ children }) {
               type="button"
               onClick={() => setAbierto(true)}
               className="rounded-full p-2 text-verde"
-              aria-label="Abrir menú del panel"
+              aria-label="Abrir menÃº del panel"
             >
               <IconoMenu />
             </button>
@@ -185,7 +161,7 @@ export default function LayoutAdmin({ children }) {
         <div className="fixed inset-0 z-60 lg:hidden">
           <button
             type="button"
-            aria-label="Cerrar menú"
+            aria-label="Cerrar menÃº"
             onClick={() => setAbierto(false)}
             className="animar-aparece absolute inset-0 bg-tinta/50"
           />
@@ -203,11 +179,11 @@ export default function LayoutAdmin({ children }) {
             </div>
 
             <div className="scrollbar-slim min-h-0 flex-1 space-y-0.5 overflow-y-auto p-3 pt-1">
-              {enlaces(true)}
+              {enlacesDe(SECCIONES, true)}
               <p className="mt-5 px-3.5 pb-1.5 text-[0.6rem] tracking-[0.15em] text-crema/40 uppercase">
                 Sistema
               </p>
-              {enlacesSistema(true)}
+              {enlacesDe(SECCIONES_SISTEMA, true)}
             </div>
 
             {/* El drawer movil no heredaba estas acciones del aside de escritorio:
@@ -225,7 +201,7 @@ export default function LayoutAdmin({ children }) {
                 onClick={salir}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold tracking-wide text-crema/55 uppercase transition-colors hover:bg-crema/10 hover:text-dorado-claro"
               >
-                Cerrar sesión
+                Cerrar sesiÃ³n
               </button>
             </div>
           </nav>

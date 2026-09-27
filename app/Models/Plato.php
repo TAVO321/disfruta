@@ -33,10 +33,11 @@ class Plato extends Model
     }
 
     /**
-     * Catalogo que se comparte al frontend como prop de Inertia.
+     * Catalogo que se comparte al frontend como prop de Inertia. El frontend
+     * filtra por id y muestra nombre y emoji; `orden` solo ordena la consulta.
      */
     public static function catalogo()
     {
-        return static::query()->activos()->get(['id', 'nombre', 'emoji', 'orden']);
+        return static::query()->activos()->get(['id', 'nombre', 'emoji']);
     }
 }

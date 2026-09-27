@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Head, Link, router, usePage } from '@inertiajs/react'
-import { IconoBuscar, IconoCerrar, IconoFiltro } from '@/components/Iconos'
-import { TarjetaProducto } from '@/components/TarjetaProducto'
+import { IconoBuscar, IconoCerrar, IconoChili, IconoFiltro } from '@/components/Iconos'
+import { GrillaProductos } from '@/components/TarjetaProducto'
+import { useEsDesktop } from '@/lib/useEsDesktop'
 import { precio } from '@/lib/config'
 import { linkWhatsApp, mensajeConsultaSimple } from '@/lib/whatsapp'
 
@@ -24,12 +25,15 @@ const VACIO = { q: '', categoria: null, picante: [], plato: [], disponibilidad: 
 
 export default function Catalogo({ productos, filtros, precios, conteos, platos, niveles }) {
   const { ajustes } = usePage().props
+  const esDesktop = useEsDesktop()
   const paginador = productos.meta ?? {}
   const [busqueda, setBusqueda] = useState(filtros.q)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [precioLocal, setPrecioLocal] = useState(filtros.precio_max ?? null)
 
   // Sincroniza el input con el valor que viene del servidor (Link con query,后退, etc).
   useEffect(() => setBusqueda(filtros.q), [filtros.q])
+  useEffect(() => setPrecioLocal(filtros.precio_max ?? null), [filtros.precio_max])
 
   const actualizar = (cambios) => {
     const siguiente = { ...filtros, ...cambios }
@@ -60,15 +64,26 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
   const alternar = (lista, valor) =>
     lista.includes(valor) ? lista.filter((x) => x !== valor) : [...lista, valor]
 
+  // El slider dispara un onChange por cada valor mientras se arrastra. Sin
+  // debounce, recorrerlo entero mandaba ~100 pedidos al servidor y cada
+  // respuesta repintaba la grilla completa. El precio se muestra al instante
+  // desde el estado local y solo se commits al soltar.
+  useEffect(() => {
+    if (precioLocal === (filtros.precio_max ?? null)) return
+    const t = setTimeout(() => actualizar({ precio_max: precioLocal }), 350)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [precioLocal])
+
   const activos =
     (filtros.categoria ? 1 : 0) +
     filtros.picante.length +
     filtros.plato.length +
     (filtros.disponibilidad !== 'todas' ? 1 : 0) +
-    (filtros.precio_max ? 1 : 0)
+    (precioLocal ? 1 : 0)
 
   const precioTecho = Math.max(precios.max, 1)
-  const topeEfectivo = filtros.precio_max || precioTecho
+  const topeEfectivo = precioLocal ?? precioTecho
 
   const panelFiltros = (
     <div className="space-y-7">
@@ -115,9 +130,7 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
                 />
                 <span className="flex gap-0.5" aria-hidden>
                   {Array.from({ length: n.chilis }, (_, i) => (
-                    <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill="#B23434" aria-hidden>
-                      <path d="M12 22c3.9 0 6.5-2.4 6.5-6 0-4.4-4.3-6.2-4-11-2.3 1.2-3.2 3.4-3.2 5.4 0 1.2-1 1.8-1.7 1.1-.5-.5-.7-1.2-.6-2C7 11 5.5 13.2 5.5 16c0 3.6 2.6 6 6.5 6Z" />
-                    </svg>
+                    <IconoChili key={i} lleno width={10} height={10} />
                   ))}
                 </span>
                 <span className="text-sm text-tinta">{n.nombre}</span>
@@ -184,14 +197,14 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
           max={precioTecho}
           step={1}
           value={topeEfectivo}
-          onChange={(e) => actualizar({ precio_max: Number(e.target.value) })}
+          onChange={(e) => setPrecioLocal(Number(e.target.value))}
           className="w-full accent-verde"
           aria-label="Precio máximo"
         />
-        {filtros.precio_max && (
+        {precioLocal && (
           <button
             type="button"
-            onClick={() => actualizar({ precio_max: null })}
+            onClick={() => setPrecioLocal(null)}
             className="mt-1.5 text-xs text-tinta-suave underline-offset-4 hover:underline"
           >
             Quitar el límite de precio
@@ -204,6 +217,7 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
           type="button"
           onClick={() => {
             setBusqueda('')
+            setPrecioLocal(null)
             router.get('/catalogo', {}, { preserveScroll: true, replace: true })
           }}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-crema-profundo py-2.5 text-xs font-semibold text-tinta-suave transition-colors hover:border-rojo hover:text-rojo"
@@ -284,14 +298,16 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[16rem_1fr]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-2xl border border-crema-profundo bg-crema-oscuro/40 p-5">
-              <p className="eyebrow mb-5 flex items-center gap-2 text-verde">
-                <IconoFiltro width={14} height={14} /> Filtros
-              </p>
-              {panelFiltros}
-            </div>
-          </aside>
+          {esDesktop && (
+            <aside>
+              <div className="sticky top-24 rounded-2xl border border-crema-profundo bg-crema-oscuro/40 p-5">
+                <p className="eyebrow mb-5 flex items-center gap-2 text-verde">
+                  <IconoFiltro width={14} height={14} /> Filtros
+                </p>
+                {panelFiltros}
+              </div>
+            </aside>
+          )}
 
           <div>
             <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -319,11 +335,7 @@ export default function Catalogo({ productos, filtros, precios, conteos, platos,
               </div>
             ) : (
               <>
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {items.map((p, i) => (
-                    <TarjetaProducto key={p.id} producto={p} indice={i} />
-                  ))}
-                </div>
+                <GrillaProductos items={items} columnas="sm:grid-cols-2 xl:grid-cols-3" />
 
                 {(paginador.last_page ?? 1) > 1 && (
                   <Paginacion
@@ -381,9 +393,9 @@ function Paginacion({ meta, params, etiqueta }) {
 
   return (
     <nav className="mt-10 flex flex-wrap items-center justify-center gap-2">
-      {links.map((l, i) => (
+      {links.map((l) => (
         <button
-          key={`${l.label}-${i}`}
+          key={l.url}
           type="button"
           disabled={!l.active && l.url === null}
           onClick={() => router.get(l.url, {}, { preserveScroll: true, replace: true })}

@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react'
+import { Head, Link, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { claseTono, fechaHora, precio } from '@/lib/config'
 import { linkWhatsApp } from '@/lib/whatsapp'
 
 export default function PedidosIndex({ pedidos, estados, filtros }) {
-  const { estadosPedido } = usePage().props
-  const nombreEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.nombre]))
-  const tonoEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.tono]))
+  const nombreEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.nombre]))
+  const tonoEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.tono]))
   const [q, setQ] = useState(filtros.q ?? '')
   const { data, setData, patch, processing, errors } = useForm({ estado: '' })
   const [editando, setEditando] = useState(null)

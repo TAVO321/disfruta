@@ -1,7 +1,7 @@
 ﻿import { usePage } from '@inertiajs/react'
 import { IlustracionFrasco } from '@/components/FrascoIlustrado'
 import { precio } from '@/lib/config'
-import { IconoEstrella } from './Iconos'
+import { IconoChili, IconoEstrella } from './Iconos'
 
 // Los chilis y el nombre de cada nivel llegan como prop global desde la tabla
 // niveles_picante, para no duplicar el catalogo en el frontend.
@@ -15,19 +15,13 @@ export function NivelPicanteBar({ nivel, conTexto = true, className = '' }) {
     <span className={`inline-flex items-center gap-1.5 ${className}`}>
       <span className="flex items-center gap-0.5" aria-hidden>
         {[0, 1, 2, 3].map((i) => (
-          <svg
+          <IconoChili
             key={i}
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill={i < cantidad ? '#B23434' : 'none'}
-            stroke={i < cantidad ? '#B23434' : '#D9CFBB'}
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          >
-            <path d="M12 22c3.9 0 6.5-2.4 6.5-6 0-4.4-4.3-6.2-4-11-2.3 1.2-3.2 3.4-3.2 5.4 0 1.2-1 1.8-1.7 1.1-.5-.5-.7-1.2-.6-2C7 11 5.5 13.2 5.5 16c0 3.6 2.6 6 6.5 6Z" />
-          </svg>
+            lleno={i < cantidad}
+            width={11}
+            height={11}
+            strokeWidth={1.8}
+          />
         ))}
       </span>
       {conTexto && (
@@ -39,7 +33,10 @@ export function NivelPicanteBar({ nivel, conTexto = true, className = '' }) {
   )
 }
 
-export function ImagenProducto({ producto, indice = 0, className = '' }) {
+// `prioritario` va separado de `indice` a proposito: `indice` elige WHICH foto
+// de la galeria, no que tan importante es. Antes el indice 0 daba `eager` por
+// defecto, asi que las 12 tarjetas del catalogo disparaban 12 descargas a la vez.
+export function ImagenProducto({ producto, indice = 0, prioritario = false, className = '' }) {
   const foto = producto.gallery[indice]
   if (foto) {
     return (
@@ -47,7 +44,8 @@ export function ImagenProducto({ producto, indice = 0, className = '' }) {
         src={foto}
         alt={`${producto.nombre}${indice > 0 ? ` · foto ${indice + 1}` : ''}`}
         className={`h-full w-full object-cover ${className}`}
-        loading={indice === 0 ? 'eager' : 'lazy'}
+        loading={prioritario ? 'eager' : 'lazy'}
+        decoding="async"
       />
     )
   }

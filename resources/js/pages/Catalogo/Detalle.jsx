@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Head, Link, useForm, usePage } from '@inertiajs/react'
 import {
   IconoCalendario,
@@ -8,18 +8,19 @@ import {
   IconoEstrella,
   IconoLote,
 } from '@/components/Iconos'
-import { useCarrito } from '@/context/Carrito'
+import { useCarritoAcciones } from '@/context/Carrito'
 import { EtiquetaStock, ImagenProducto, NivelPicanteBar, PrecioProducto } from '@/components/ProductoUI'
 import { fecha, precio } from '@/lib/config'
 import { linkWhatsApp, mensajeConsultaSimple } from '@/lib/whatsapp'
 
 export default function Detalle({ producto, relacionados }) {
   const { ajustes, platos } = usePage().props
-  const { agregar } = useCarrito()
+  const { agregar } = useCarritoAcciones()
   const [foto, setFoto] = useState(0)
   const [cantidad, setCantidad] = useState(1)
   const [agregado, setAgregado] = useState(false)
   const [pestana, setPestana] = useState('detalle')
+  const temporizador = useRef(null)
 
   const resenas = useMemo(() => producto.resenas ?? [], [producto.resenas])
   const promedio = useMemo(
@@ -35,10 +36,13 @@ export default function Detalle({ producto, relacionados }) {
     setCantidad((c) => Math.min(Math.max(1, c), Math.max(1, tope)))
   }, [tope])
 
+  useEffect(() => () => clearTimeout(temporizador.current), [])
+
   const sumar = () => {
     agregar(producto, cantidad, agotado)
     setAgregado(true)
-    setTimeout(() => setAgregado(false), 1800)
+    clearTimeout(temporizador.current)
+    temporizador.current = setTimeout(() => setAgregado(false), 1800)
   }
 
   return (
@@ -69,7 +73,7 @@ export default function Detalle({ producto, relacionados }) {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="bg-crema-oscuro p-5 sm:p-7">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-white shadow-suave">
-              <ImagenProducto producto={producto} indice={foto} />
+              <ImagenProducto producto={producto} indice={foto} prioritario={foto === 0} />
               {agotado && (
                 <span className="eyebrow absolute top-3 left-3 rounded-full bg-rojo px-3 py-1.5 text-crema">
                   Sin stock · próximo lote
@@ -89,7 +93,13 @@ export default function Detalle({ producto, relacionados }) {
                     }`}
                     aria-label={`Ver foto ${i + 1}`}
                   >
-                    <img src={f} alt="" className="h-full w-full object-cover" />
+                    <img
+                      src={f}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </button>
                 ))}
               </div>
@@ -366,8 +376,8 @@ export default function Detalle({ producto, relacionados }) {
           <section className="mt-16 border-t border-crema-profundo pt-12">
             <h2 className="font-serif text-2xl font-bold text-verde">También te puede gustar</h2>
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {relacionados.map((p, i) => (
-                <TarjetaMini key={p.id} producto={p} indice={i} />
+              {relacionados.map((p) => (
+                <TarjetaMini key={p.id} producto={p} />
               ))}
             </div>
           </section>
@@ -377,14 +387,14 @@ export default function Detalle({ producto, relacionados }) {
   )
 }
 
-function TarjetaMini({ producto, indice }) {
+function TarjetaMini({ producto }) {
   return (
     <Link
       href={`/catalogo/${producto.slug}`}
       className="group block overflow-hidden rounded-2xl border border-crema-profundo bg-white transition-shadow hover:shadow-media"
     >
       <div className="aspect-square overflow-hidden bg-crema-oscuro">
-        <ImagenProducto producto={producto} indice={indice} />
+        <ImagenProducto producto={producto} />
       </div>
       <div className="p-4">
         <h3 className="font-serif text-base leading-snug font-semibold text-verde group-hover:text-verde-medio">

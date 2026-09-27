@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import { IlustracionFrasco } from '@/components/FrascoIlustrado'
 import { PrecioProducto } from '@/components/ProductoUI'
+import { Campo } from '@/components/Campo'
 import { IconoCarrito, IconoCerrar, IconoMenos, IconoMas, IconoWhatsapp } from '@/components/Iconos'
 import { precio } from '@/lib/config'
 import { linkWhatsApp, mensajeWhatsApp } from '@/lib/whatsapp'
@@ -111,6 +112,7 @@ export default function CarritoIndex() {
                         alt={item.nombre}
                         className="h-full w-full object-cover"
                         loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <IlustracionFrasco
@@ -247,35 +249,5 @@ export default function CarritoIndex() {
         )}
       </div>
     </>
-  )
-}
-
-function Campo({ etiqueta, valor, onChange, placeholder, multilinea, requerido }) {
-  const clases =
-    'w-full rounded-xl border border-crema-profundo bg-white px-3.5 py-3 text-sm text-tinta transition-colors placeholder:text-tinta-suave/50 focus:border-verde-claro'
-
-  return (
-    <div>
-      <label className="eyebrow mb-1.5 block text-tinta-suave">
-        {etiqueta}
-        {requerido && <span className="ml-1 text-rojo">*</span>}
-      </label>
-      {multilinea ? (
-        <textarea
-          value={valor}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className={`${clases} resize-none`}
-        />
-      ) : (
-        <input
-          value={valor}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={clases}
-        />
-      )}
-    </div>
   )
 }

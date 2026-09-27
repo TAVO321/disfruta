@@ -1,12 +1,18 @@
-import { useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { router } from '@inertiajs/react'
 import { IconoCarrito, IconoCheck } from '@/components/Iconos'
 import { EtiquetaStock, ImagenProducto, NivelPicanteBar, PrecioProducto } from '@/components/ProductoUI'
-import { useCarrito } from '@/context/Carrito'
+import { useCarritoAcciones, useCarritoIds } from '@/context/Carrito'
 
-export function TarjetaProducto({ producto, indice }) {
-  const { agregar, enCarrito } = useCarrito()
+/**
+ * Recibe `enCarrito` como prop en vez de leerlo del carrito: asi la tarjeta
+ * queda memoizada y al agregar un producto solo se repinta esa tarjeta, no las
+ * doce de la grilla.
+ */
+const TarjetaProducto = memo(function TarjetaProducto({ producto, indice, enCarrito }) {
+  const { agregar } = useCarritoAcciones()
   const [agregado, setAgregado] = useState(false)
+  const temporizador = useRef(null)
   const agotado = producto.stock === 0
 
   const ver = () => router.visit(`/catalogo/${producto.slug}`)
@@ -14,8 +20,11 @@ export function TarjetaProducto({ producto, indice }) {
   const sumar = () => {
     agregar(producto, 1)
     setAgregado(true)
-    setTimeout(() => setAgregado(false), 1600)
+    clearTimeout(temporizador.current)
+    temporizador.current = setTimeout(() => setAgregado(false), 1600)
   }
+
+  useEffect(() => () => clearTimeout(temporizador.current), [])
 
   return (
     <article
@@ -108,7 +117,7 @@ export function TarjetaProducto({ producto, indice }) {
             </>
           ) : agotado ? (
             'Reservar próximo lote'
-          ) : enCarrito(producto.id) ? (
+          ) : enCarrito ? (
             <>
               <IconoCheck width={16} height={16} /> En el carrito
             </>
@@ -121,4 +130,24 @@ export function TarjetaProducto({ producto, indice }) {
       </div>
     </article>
   )
-}
+})
+
+/**
+ * La grilla es la unica que se suscribe al carrito, de modo que agregar un
+ * producto re-renderiza esta lista y las tarjetas memoizadas omiten el resto.
+ */
+export const GrillaProductos = memo(function GrillaProductos({
+  items,
+  columnas = 'sm:grid-cols-2 lg:grid-cols-3',
+  className = '',
+}) {
+  const ids = useCarritoIds()
+
+  return (
+    <div className={`grid gap-5 ${columnas} ${className}`}>
+      {items.map((p, i) => (
+        <TarjetaProducto key={p.id} producto={p} indice={i} enCarrito={ids.has(p.id)} />
+      ))}
+    </div>
+  )
+})

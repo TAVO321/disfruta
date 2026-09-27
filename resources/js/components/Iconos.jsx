@@ -70,9 +70,21 @@ export const IconoCorazonManos = (p) => (
   </svg>
 )
 
+const PATH_CHILI = 'M12 22c3.9 0 6.5-2.4 6.5-6 0-4.4-4.3-6.2-4-11-2.3 1.2-3.2 3.4-3.2 5.4 0 1.2-1 1.8-1.7 1.1-.5-.5-.7-1.2-.6-2C7 11 5.5 13.2 5.5 16c0 3.6 2.6 6 6.5 6Z'
+
 export const IconoFuego = (p) => (
   <svg {...base(p)}>
-    <path d="M12 22c3.9 0 6.5-2.4 6.5-6 0-4.4-4.3-6.2-4-11-2.3 1.2-3.2 3.4-3.2 5.4 0 1.2-1 1.8-1.7 1.1-.5-.5-.7-1.2-.6-2C7 11 5.5 13.2 5.5 16c0 3.6 2.6 6 6.5 6Z" />
+    <path d={PATH_CHILI} />
+  </svg>
+)
+
+export const IconoChili = ({ lleno, ...p }) => (
+  <svg
+    fill={lleno ? '#B23434' : 'none'}
+    stroke={lleno ? '#B23434' : '#D9CFBB'}
+    {...base(p)}
+  >
+    <path d={PATH_CHILI} />
   </svg>
 )
 

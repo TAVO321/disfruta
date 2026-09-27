@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import { Hero } from '@/components/Hero'
 import { IconoCheck, IconoChef, IconoFlecha, IconoWhatsapp } from '@/components/Iconos'
-import { TarjetaProducto } from '@/components/TarjetaProducto'
+import { GrillaProductos } from '@/components/TarjetaProducto'
 import { linkWhatsApp, mensajeConsultaSimple } from '@/lib/whatsapp'
 
 export default function Home({ productos, promociones }) {
@@ -39,11 +39,7 @@ export default function Home({ productos, promociones }) {
           enlace={{ a: '/catalogo', texto: 'Ver catálogo completo' }}
         />
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {destacados.map((p, i) => (
-            <TarjetaProducto key={p.id} producto={p} indice={i} />
-          ))}
-        </div>
+        <GrillaProductos items={destacados} className="mt-10" />
       </section>
 
       <section className="bg-verde py-20 text-crema">

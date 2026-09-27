@@ -36,10 +36,11 @@ class NivelPicante extends Model
 
     /**
      * Catalogo que se comparte al frontend como prop de Inertia. El frontend
-     * busca el nivel por id y dibuja tantos chilis como indique.
+     * busca el nivel por id y dibuja tantos chilis como indique, asi que `orden`
+     * solo hace falta para ordenar la consulta y `descripcion` no se usa.
      */
     public static function catalogo()
     {
-        return static::query()->activos()->get(['id', 'nombre', 'chilis', 'descripcion', 'orden']);
+        return static::query()->activos()->get(['id', 'nombre', 'chilis']);
     }
 }

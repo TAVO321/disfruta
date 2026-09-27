@@ -35,8 +35,11 @@ export function Navbar({ onAbrirCarrito }) {
   }, [])
 
   return (
+    // El desenfoque queda solo desde lg: `backdrop-filter` tiene que releer y
+    // volver a pintar lo que hay detras en cada frame de scroll, y en un movil
+    // eso se nota como tirones. En pantallas chico el fondo va opaco.
     <header
-      className={`sticky top-0 z-40 border-b bg-crema/92 backdrop-blur transition-shadow ${
+      className={`sticky top-0 z-40 border-b bg-crema transition-shadow lg:bg-crema/92 lg:backdrop-blur ${
         scrolleado ? 'border-crema-profundo shadow-suave' : 'border-transparent'
       }`}
     >

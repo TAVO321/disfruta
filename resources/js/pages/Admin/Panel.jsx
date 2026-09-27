@@ -1,10 +1,9 @@
-import { Head, Link, usePage } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { ImagenProducto } from '@/components/ProductoUI'
 import { claseTono, fecha, precio } from '@/lib/config'
 
-export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_productos }) {
-  const { estadosPedido } = usePage().props
+export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_productos, estadosPedido }) {
   const nombreEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.nombre]))
   const tonoEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.tono]))
 

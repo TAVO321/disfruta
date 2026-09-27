@@ -387,6 +387,8 @@ export default function ProductosForm({ producto, categorias }) {
                       <img
                         src={img.url}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className={`aspect-square w-full rounded-lg object-cover ${eliminada ? 'opacity-30' : ''}`}
                       />
                       <button
@@ -434,7 +436,13 @@ export default function ProductosForm({ producto, categorias }) {
               <ul className="mt-3 flex flex-wrap gap-2">
                 {vistasPrevias.map((url) => (
                   <li key={url} className="h-16 w-16 overflow-hidden rounded-lg border border-crema-profundo">
-                    <img src={url} alt="Vista previa" className="h-full w-full object-cover" />
+                    <img
+                      src={url}
+                      alt="Vista previa"
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
                   </li>
                 ))}
               </ul>
