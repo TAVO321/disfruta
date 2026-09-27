@@ -12,8 +12,6 @@ class Pedido extends Model
 {
     use HasFactory;
 
-    public const ESTADOS = ['nuevo', 'confirmado', 'preparando', 'entregado', 'cancelado'];
-
     protected $fillable = [
         'cliente_id', 'cliente_nombre', 'telefono', 'zona',
         'notas', 'estado', 'total',

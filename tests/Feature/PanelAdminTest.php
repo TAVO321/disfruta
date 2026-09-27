@@ -137,7 +137,10 @@ class PanelAdminTest extends TestCase
 
         $tono = Producto::where('nombre', 'Producto Sin Tono')->firstOrFail()->tono;
 
-        $this->assertSame(Producto::TONO_POR_DEFECTO, $tono);
+        // El color no lo decide el producto: lo hereda de su familia, para que
+        // un frasco nuevo de Encurtidos salga igual que los demas Encurtidos.
+        $this->assertSame(Categoria::firstOrFail()->tonoParaProducto(), $tono);
+        $this->assertNotEmpty($tono);
     }
 
     public function test_la_pagina_principal_manda_un_tono_completo_en_todos_los_productos(): void

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PedidoResource;
+use App\Models\EstadoPedido;
 use App\Models\Pedido;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +27,7 @@ class PedidoController extends Controller
 
         return Inertia::render('Admin/Pedidos/Index', [
             'pedidos' => PedidoResource::collection($pedidos),
-            'estados' => Pedido::ESTADOS,
+            'estados' => EstadoPedido::catalogo(),
             'filtros' => $request->only('q', 'estado'),
         ]);
     }
@@ -33,7 +35,7 @@ class PedidoController extends Controller
     public function estado(Request $request, Pedido $pedido): RedirectResponse
     {
         $datos = $request->validate([
-            'estado' => ['required', 'in:'.implode(',', Pedido::ESTADOS)],
+            'estado' => ['required', Rule::exists('estados_pedido', 'id')],
         ]);
 
         $pedido->update($datos);

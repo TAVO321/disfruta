@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,7 +34,7 @@ class ProductoController extends Controller
 
         return Inertia::render('Admin/Productos/Index', [
             'productos' => ProductoResource::collection($productos),
-            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug']),
+            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug', 'tono']),
             'filtros' => $request->only('q', 'categoria'),
         ]);
     }
@@ -42,7 +43,7 @@ class ProductoController extends Controller
     {
         return Inertia::render('Admin/Productos/Form', [
             'producto' => null,
-            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug']),
+            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug', 'tono']),
         ]);
     }
 
@@ -66,7 +67,7 @@ class ProductoController extends Controller
     {
         return Inertia::render('Admin/Productos/Form', [
             'producto' => new ProductoResource($producto->load(['categoria', 'imagenes'])),
-            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug']),
+            'categorias' => Categoria::orderBy('orden')->get(['id', 'nombre', 'slug', 'tono']),
         ]);
     }
 
@@ -104,14 +105,14 @@ class ProductoController extends Controller
             'precio' => ['required', 'numeric', 'min:0', 'max:99999'],
             'precio_antes' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'presentacion' => ['required', 'string', 'max:60'],
-            'nivel_picante' => ['required', 'in:'.implode(',', Producto::NIVELES_PICANTE)],
+            'nivel_picante' => ['required', Rule::exists('niveles_picante', 'id')],
             'stock' => ['required', 'integer', 'min:0'],
             'stock_minimo' => ['required', 'integer', 'min:0'],
             'peso' => ['required', 'integer', 'min:0'],
             'ingredientes' => ['nullable', 'array'],
             'ingredientes.*' => ['string', 'max:80'],
             'platos_recomendados' => ['nullable', 'array'],
-            'platos_recomendados.*' => ['string', 'max:80'],
+            'platos_recomendados.*' => ['string', Rule::exists('platos', 'id')],
             'recomendacion_consumo' => ['nullable', 'string', 'max:1000'],
             'conservacion' => ['nullable', 'string', 'max:1000'],
             'insignia' => ['nullable', 'string', 'max:40'],
@@ -146,10 +147,15 @@ class ProductoController extends Controller
     }
 
     /**
-     * La ilustracion del frasco se pinta con el array tono. El formulario no lo
-     * manda, asi que un producto nuevo quedaba con la columna en null y la
-     * pagina principal se caia entera al intentar desestructurarlo. Se respeta
-     * el tono que ya tiene el producto y solo se completa el que falta.
+     * La ilustracion del frasco se pinta con el array tono. El orden de
+     * preferencia es: lo que mande el formulario, el tono que ya tiene el
+     * producto, el de su categoria y, como ultimo recurso, el de la marca.
+     *
+     * La categoria es la que manda porque es la familia: asi un frasco nuevo de
+     * Encurtidos nace del mismo color que los demas Encurtidos, sin que haya que
+     * elegirlo a mano. Un producto ya creado conserva su tono, para que cambiar
+     * el color de una familia no repinte el catalogo entero; el panel ofrece
+     * aplicar el cambio a todos de forma explicita.
      *
      * @param  array<string, mixed>  $datos
      */
@@ -158,7 +164,7 @@ class ProductoController extends Controller
         $enviado = $datos['tono'] ?? null;
 
         if (is_array($enviado) && $enviado !== []) {
-            $datos['tono'] = array_merge(Producto::TONO_POR_DEFECTO, array_filter($enviado));
+            $datos['tono'] = array_merge($this->tonoDeCategoria($datos), array_filter($enviado));
 
             return;
         }
@@ -167,7 +173,24 @@ class ProductoController extends Controller
 
         $datos['tono'] = is_array($actual) && $actual !== []
             ? array_merge(Producto::TONO_POR_DEFECTO, $actual)
-            : Producto::TONO_POR_DEFECTO;
+            : $this->tonoDeCategoria($datos);
+    }
+
+    /**
+     * @param  array<string, mixed>  $datos
+     * @return array<string, string>
+     */
+    private function tonoDeCategoria(array $datos): array
+    {
+        $categoriaId = $datos['categoria_id'] ?? null;
+
+        if (! $categoriaId) {
+            return Producto::TONO_POR_DEFECTO;
+        }
+
+        $tono = Categoria::find($categoriaId)?->tonoParaProducto();
+
+        return $tono ?: Producto::TONO_POR_DEFECTO;
     }
 
     private function guardarImagenes(Request $request, Producto $producto): void

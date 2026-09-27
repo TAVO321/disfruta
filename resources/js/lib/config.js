@@ -11,16 +11,35 @@ export const MONEDA = {
   locale: 'es-BO',
 }
 
-// Las listas de platos y niveles de picante viven en PHP (App\Lib\Platos y
-// App\Lib\NivelPicante) y llegan como props globales de Inertia para no duplicarlas.
+// Los catalogos (platos, niveles de picante, estados de pedido y tipos de
+// promocion) viven en la base y llegan como props globales de Inertia, para no
+// duplicarlos ni en PHP ni en JS.
 
-export const ESTADOS_PEDIDO = [
-  { id: 'nuevo', nombre: 'Nuevo', tono: 'dorado' },
-  { id: 'confirmado', nombre: 'Confirmado', tono: 'verde' },
-  { id: 'preparando', nombre: 'Preparando', tono: 'dorado' },
-  { id: 'entregado', nombre: 'Entregado', tono: 'crema' },
-  { id: 'cancelado', nombre: 'Cancelado', tono: 'rojo' },
-]
+/**
+ * Une un tono de la base con las clases del disenio. El color del badge es un
+ * dato editable desde el panel; la clase de Tailwind es codigo, y esta es la
+ * unica parte del proyecto que traduce uno en otro.
+ *
+ * @param {string} tono token de color, por ejemplo 'dorado-suave'
+ * @returns {string} clases de Tailwind
+ */
+export function claseTono(tono) {
+  return (
+    {
+      dorado: 'bg-dorado text-verde',
+      'dorado-claro': 'bg-dorado-claro text-verde',
+      'dorado-suave': 'bg-dorado-suave text-verde',
+      verde: 'bg-verde text-crema',
+      'verde-medio': 'bg-verde-medio text-crema',
+      'verde-claro': 'bg-verde-claro text-crema',
+      'verde-suave': 'bg-verde-suave text-verde',
+      crema: 'bg-crema text-verde',
+      'crema-oscuro': 'bg-crema-oscuro text-verde',
+      rojo: 'bg-rojo text-crema',
+      'rojo-suave': 'bg-rojo-suave text-rojo',
+    }[tono] ?? 'bg-crema text-verde'
+  )
+}
 
 const entero = new Intl.NumberFormat(MONEDA.locale, {
   minimumFractionDigits: 0,

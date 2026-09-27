@@ -12,7 +12,8 @@ use Illuminate\Database\Seeder;
  * Se divide en dos partes:
  *
  * 1. Lo que SIEMPRE corre, porque usa updateOrCreate y es idempotente:
- *    el usuario administrador y los ajustes del sitio.
+ *    el usuario administrador, los ajustes del sitio y los catalogos (platos,
+ *    niveles de picante, estados de pedido y tipos de promocion).
  *
  * 2. La mercaderia de arranque (catalogo, promociones, resenas y pedidos de
  *    ejemplo), que SOLO corre si la base esta vacia. CatalogoSeeder y
@@ -29,14 +30,17 @@ class ProductionSeeder extends Seeder
     {
         $this->call(AdminUserSeeder::class);
         $this->call(AjustesSeeder::class);
+        $this->call(CatalogosSeeder::class);
 
         if (Categoria::query()->exists() || Producto::query()->exists()) {
             $this->command?->warn('El catalogo ya tiene mercaderia: se omite la carga inicial.');
-
-            return;
+        } else {
+            $this->call(CatalogoSeeder::class);
+            $this->call(PedidosDemoSeeder::class);
         }
 
-        $this->call(CatalogoSeeder::class);
-        $this->call(PedidosDemoSeeder::class);
+        // Va ultimo, cuando la mercaderia ya esta, para poder derivar el color
+        // de cada familia a partir de los frascos que ya tiene.
+        $this->call(PaletaFamiliasSeeder::class);
     }
 }

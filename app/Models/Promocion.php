@@ -14,8 +14,6 @@ class Promocion extends Model
 
     protected $table = 'promociones';
 
-    public const TIPOS = ['oferta', 'combo', 'temporada'];
-
     protected $fillable = [
         'titulo', 'slug', 'descripcion', 'tipo',
         'descuento', 'activa', 'vigente_desde', 'vigente_hasta',
@@ -45,7 +43,8 @@ class Promocion extends Model
             ->where(fn ($q) => $q->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>=', $hoy));
     }
 
-    public function estaVigente(): bool    {
+    public function estaVigente(): bool
+    {
         $hoy = now()->startOfDay();
 
         return $this->activa

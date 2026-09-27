@@ -3,8 +3,8 @@ import { IlustracionFrasco } from '@/components/FrascoIlustrado'
 import { precio } from '@/lib/config'
 import { IconoEstrella } from './Iconos'
 
-// Los chilis y el nombre de cada nivel llegan como prop global desde
-// App\Lib\NivelPicante para no duplicar la lista en el frontend.
+// Los chilis y el nombre de cada nivel llegan como prop global desde la tabla
+// niveles_picante, para no duplicar el catalogo en el frontend.
 export function NivelPicanteBar({ nivel, conTexto = true, className = '' }) {
   const { niveles } = usePage().props
   const definicion = (niveles ?? []).find((n) => n.id === nivel)

@@ -1,20 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Head, Link, router, useForm } from '@inertiajs/react'
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
-import { ESTADOS_PEDIDO, fechaHora, precio } from '@/lib/config'
+import { claseTono, fechaHora, precio } from '@/lib/config'
 import { linkWhatsApp } from '@/lib/whatsapp'
 
-const NOMBRE_ESTADO = Object.fromEntries(ESTADOS_PEDIDO.map((e) => [e.id, e.nombre]))
-
-const TONO_ESTADO = {
-  nuevo: 'bg-dorado text-verde',
-  confirmado: 'bg-verde text-crema',
-  preparando: 'bg-dorado-suave text-verde',
-  entregado: 'bg-verde-suave text-verde',
-  cancelado: 'bg-rojo text-crema',
-}
-
 export default function PedidosIndex({ pedidos, estados, filtros }) {
+  const { estadosPedido } = usePage().props
+  const nombreEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.nombre]))
+  const tonoEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.tono]))
   const [q, setQ] = useState(filtros.q ?? '')
   const { data, setData, patch, processing, errors } = useForm({ estado: '' })
   const [editando, setEditando] = useState(null)
@@ -97,7 +90,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                   : 'border-crema-profundo bg-white text-tinta hover:border-verde'
               }`}
             >
-              {NOMBRE_ESTADO[e] ?? e}
+              {nombreEstado[e] ?? e}
             </button>
           ))}
         </div>
@@ -122,10 +115,10 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                     <span className="font-serif text-lg font-bold text-verde sm:order-1">#{p.id}</span>
                     <span
                       className={`eyebrow shrink-0 rounded-full px-2.5 py-1 sm:order-3 ${
-                        TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'
+                        claseTono(tonoEstado[p.estado])
                       }`}
                     >
-                      {NOMBRE_ESTADO[p.estado] ?? p.estado}
+                      {nombreEstado[p.estado] ?? p.estado}
                     </span>
                   </div>
 
@@ -187,7 +180,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                         >
                           {estados.map((e) => (
                             <option key={e} value={e}>
-                              {NOMBRE_ESTADO[e] ?? e}
+                              {nombreEstado[e] ?? e}
                             </option>
                           ))}
                         </select>

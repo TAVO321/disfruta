@@ -2,10 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use App\Lib\NivelPicante;
-use App\Lib\Platos;
 use App\Models\Ajuste;
 use App\Models\Categoria;
+use App\Models\EstadoPedido;
+use App\Models\NivelPicante;
+use App\Models\Plato;
+use App\Models\TipoPromocion;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -24,12 +26,16 @@ class HandleInertiaRequests extends Middleware
 
             'categorias' => fn () => Categoria::activas()
                 ->orderBy('orden')
-                ->get(['id', 'slug', 'nombre'])
+                ->get(['id', 'slug', 'nombre', 'tono'])
                 ->all(),
 
-            'platos' => fn () => Platos::todos(),
+            'platos' => fn () => Plato::catalogo(),
 
-            'niveles' => fn () => NivelPicante::todos(),
+            'niveles' => fn () => NivelPicante::catalogo(),
+
+            'estadosPedido' => fn () => EstadoPedido::catalogo(),
+
+            'tiposPromocion' => fn () => TipoPromocion::catalogo(),
 
             'ajustes' => fn () => [
                 'whatsapp' => Ajuste::valor('whatsapp', ''),

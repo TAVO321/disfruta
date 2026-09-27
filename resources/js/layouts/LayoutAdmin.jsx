@@ -21,6 +21,8 @@ const SECCIONES = [
 ]
 
 const SECCIONES_SISTEMA = [
+  { ruta: '/admin/categorias', texto: 'Familias', icono: IconoEtiqueta },
+  { ruta: '/admin/catalogos', texto: 'Catálogos', icono: IconoEtiqueta },
   { ruta: '/admin/usuarios', texto: 'Administradores', icono: IconoUsuarioGrupo },
   { ruta: '/admin/ajustes', texto: 'Ajustes', icono: IconoEtiqueta },
 ]

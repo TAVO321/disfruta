@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Promocion;
+use App\Models\TipoPromocion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,7 +33,7 @@ class PromocionController extends Controller
                     'vigente' => $p->estaVigente(),
                     'productos_total' => $p->productos_count,
                 ]),
-            'tipos' => Promocion::TIPOS,
+            'tipos' => TipoPromocion::catalogo(),
         ]);
     }
 
@@ -104,7 +106,7 @@ class PromocionController extends Controller
                 'vigente_hasta' => $promocion->vigente_hasta?->toDateString(),
                 'productos' => $promocion->productos()->pluck('productos.id')->all(),
             ] : null,
-            'tipos' => Promocion::TIPOS,
+            'tipos' => TipoPromocion::catalogo(),
             'productos' => Producto::orderBy('nombre')->get(['id', 'nombre', 'precio']),
         ]);
     }
@@ -114,7 +116,7 @@ class PromocionController extends Controller
         $datos = $request->validate([
             'titulo' => ['required', 'string', 'max:120'],
             'descripcion' => ['required', 'string', 'max:500'],
-            'tipo' => ['required', 'in:'.implode(',', Promocion::TIPOS)],
+            'tipo' => ['required', Rule::exists('tipos_promocion', 'id')],
             'descuento' => ['required', 'integer', 'min:0', 'max:100'],
             'activa' => ['boolean'],
             'vigente_desde' => ['nullable', 'date'],

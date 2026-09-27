@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductoResource;
 use App\Http\Resources\PromocionResource;
-use App\Lib\NivelPicante;
-use App\Lib\Platos;
 use App\Models\Categoria;
+use App\Models\NivelPicante;
+use App\Models\Plato;
 use App\Models\Producto;
 use App\Models\Promocion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -75,15 +76,20 @@ class TiendaController extends Controller
             ->when($orden === 'precio-asc', fn ($q) => $q->orderBy('precio'))
             ->when($orden === 'precio-desc', fn ($q) => $q->orderByDesc('precio'))
             ->when($orden === 'nombre', fn ($q) => $q->orderBy('nombre'))
-            ->when($orden === 'picante', fn ($q) => $q->orderByRaw(
-                "CASE nivel_picante WHEN 'infierno' THEN 4 WHEN 'muy-picante' THEN 3 WHEN 'picante' THEN 2 WHEN 'medio' THEN 1 ELSE 0 END DESC"
+            ->when($orden === 'picante', fn ($q) => $q->orderByDesc(
+                // El orden lo decide la tabla de niveles, no una lista de ids
+                // escrita en el codigo: agregar un nivel no obliga a tocar aca.
+                DB::table('niveles_picante')
+                    ->select('chilis')
+                    ->whereColumn('niveles_picante.id', 'productos.nivel_picante')
+                    ->limit(1)
             ))
             ->when($orden === 'destacados', fn ($q) => $q->orderByDesc('destacado')->latest())
             ->paginate(12)
             ->withQueryString();
 
-        $niveles = NivelPicante::todos();
-        $listaPlatos = Platos::todos();
+        $niveles = NivelPicante::catalogo();
+        $listaPlatos = Plato::catalogo();
 
         // Los conteos de facetas se resuelven con una consulta por tipo en vez
         // de una por cada valor, para no crecer con el catalogo.

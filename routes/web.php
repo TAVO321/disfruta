@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\AjusteController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CatalogoController;
+use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ClienteController;
 use App\Http\Controllers\Admin\LoteController;
 use App\Http\Controllers\Admin\PanelController;
@@ -50,6 +52,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'admin')->group(funct
         ->name('promociones.alternar');
     Route::get('clientes', [ClienteController::class, 'index'])->name('clientes');
     Route::delete('clientes/{cliente}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
+
+    // Alta y edicion viven en la misma pantalla, asi que no hay create/edit.
+    Route::resource('categorias', CategoriaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['categorias' => 'categoria']);
+    Route::patch('categorias/{categoria}/aplicar-tono', [CategoriaController::class, 'aplicarTono'])
+        ->name('categorias.aplicar-tono');
+
+    Route::get('catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+    Route::post('catalogos/{catalogo}', [CatalogoController::class, 'store'])->name('catalogos.store');
+    Route::put('catalogos/{catalogo}/{id}', [CatalogoController::class, 'update'])->name('catalogos.update');
+    Route::delete('catalogos/{catalogo}/{id}', [CatalogoController::class, 'destroy'])->name('catalogos.destroy');
 
     Route::get('ajustes', [AjusteController::class, 'index'])->name('ajustes.index');
     Route::put('ajustes', [AjusteController::class, 'update'])->name('ajustes.update');

@@ -2,13 +2,9 @@ import { Head, Link, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { MONEDA, fecha } from '@/lib/config'
 
-const NOMBRE_TIPO = {
-  oferta: 'Oferta',
-  combo: 'Combo',
-  temporada: 'Temporada',
-}
-
 export default function PromocionesIndex({ promociones, tipos }) {
+  const nombreTipo = Object.fromEntries(tipos.map((t) => [t.id, t.nombre]))
+
   const eliminar = (p) => {
     if (!confirm(`¿Eliminar la promoción "${p.titulo}"?`)) return
     router.delete(`/admin/promociones/${p.id}`, { preserveScroll: true })
@@ -64,7 +60,7 @@ export default function PromocionesIndex({ promociones, tipos }) {
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <dt className="tracking-wide text-tinta-suave uppercase">Tipo</dt>
-                  <dd className="mt-0.5 font-medium text-tinta">{NOMBRE_TIPO[p.tipo] ?? p.tipo}</dd>
+                  <dd className="mt-0.5 font-medium text-tinta">{nombreTipo[p.tipo] ?? p.tipo}</dd>
                 </div>
                 <div>
                   <dt className="tracking-wide text-tinta-suave uppercase">Productos</dt>
@@ -124,7 +120,7 @@ export default function PromocionesIndex({ promociones, tipos }) {
       )}
 
       <p className="mt-6 text-xs text-tinta-suave">
-        Tipos disponibles: {tipos.map((t) => NOMBRE_TIPO[t] ?? t).join(' · ')}. El precio final se
+        Tipos disponibles: {tipos.map((t) => t.nombre).join(' · ')}. El precio final se
         calcula en {MONEDA.simbolo} sobre el precio del producto menos el porcentaje.
       </p>
     </>

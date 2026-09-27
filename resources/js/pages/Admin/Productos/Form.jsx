@@ -127,7 +127,11 @@ export default function ProductosForm({ producto, categorias }) {
               </Campo>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Campo label="Categoría" error={errors.categoria_id}>
+                <Campo
+                  label="Categoría"
+                  error={errors.categoria_id}
+                  hint="El frasco toma el color de la familia. Para cambiarlo, editá la familia en /admin/categorias."
+                >
                   <select
                     value={data.categoria_id}
                     onChange={(e) => setData('categoria_id', e.target.value)}

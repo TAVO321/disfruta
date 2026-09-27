@@ -2,22 +2,10 @@ import { Head, Link, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { precio } from '@/lib/config'
 
-const NOMBRE_TIPO = {
-  oferta: 'Oferta',
-  combo: 'Combo',
-  temporada: 'Temporada',
-}
-
-const AYUDA_TIPO = {
-  oferta: 'Descuento por porcentaje sobre el precio de lista.',
-  combo: 'Pack de varios productos a precio especial.',
-  temporada: 'Promoción temporal de una época del año.',
-}
-
 const VACIA = {
   titulo: '',
   descripcion: '',
-  tipo: 'oferta',
+  tipo: '',
   descuento: 15,
   activa: true,
   vigente_desde: new Date().toISOString().slice(0, 10),
@@ -28,7 +16,9 @@ const VACIA = {
 export default function PromocionesForm({ promocion, tipos, productos }) {
   const editando = Boolean(promocion)
   const { data, setData, post, processing, errors } = useForm(
-    editando ? { ...promocion } : { ...VACIA },
+    // Sin edicion arranca con el primer tipo disponible, que hoy viene de la
+    // base y no de una lista escrita en el componente.
+    editando ? { ...promocion } : { ...VACIA, tipo: tipos[0]?.id ?? '' },
   )
 
   const alternarProducto = (id) =>
@@ -110,21 +100,23 @@ export default function PromocionesForm({ promocion, tipos, productos }) {
               <div className="grid gap-2 sm:grid-cols-3">
                 {tipos.map((t) => (
                   <button
-                    key={t}
+                    key={t.id}
                     type="button"
-                    onClick={() => setData('tipo', t)}
+                    onClick={() => setData('tipo', t.id)}
                     className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
-                      data.tipo === t
+                      data.tipo === t.id
                         ? 'border-verde bg-verde text-crema'
                         : 'border-crema-profundo bg-white text-tinta hover:border-verde'
                     }`}
                   >
-                    {NOMBRE_TIPO[t] ?? t}
+                    {t.nombre}
                   </button>
                 ))}
               </div>
               {errors.tipo && <p className="mt-1 text-xs text-rojo">{errors.tipo}</p>}
-              <p className="mt-1.5 text-[0.7rem] text-tinta-suave">{AYUDA_TIPO[data.tipo]}</p>
+              <p className="mt-1.5 text-[0.7rem] text-tinta-suave">
+                {tipos.find((t) => t.id === data.tipo)?.descripcion}
+              </p>
             </div>
 
             <label className="block">

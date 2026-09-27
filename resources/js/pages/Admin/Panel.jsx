@@ -1,19 +1,13 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head, Link, usePage } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { ImagenProducto } from '@/components/ProductoUI'
-import { ESTADOS_PEDIDO, fecha, precio } from '@/lib/config'
-
-const NOMBRE_ESTADO = Object.fromEntries(ESTADOS_PEDIDO.map((e) => [e.id, e.nombre]))
-
-const TONO_ESTADO = {
-  nuevo: 'bg-dorado text-verde',
-  confirmado: 'bg-verde text-crema',
-  preparando: 'bg-dorado-suave text-verde',
-  entregado: 'bg-verde-suave text-verde',
-  cancelado: 'bg-rojo text-crema',
-}
+import { claseTono, fecha, precio } from '@/lib/config'
 
 export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_productos }) {
+  const { estadosPedido } = usePage().props
+  const nombreEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.nombre]))
+  const tonoEstado = Object.fromEntries((estadosPedido ?? []).map((e) => [e.id, e.tono]))
+
   // Resources no paginados llegan como array plano; los paginados como {data, meta}.
   const pedidos = ultimos_pedidos ?? []
 
@@ -85,10 +79,10 @@ export default function Panel({ resumen, ultimos_pedidos, stock_critico, top_pro
                       </span>
                       <span
                         className={`eyebrow shrink-0 rounded-full px-2.5 py-0.5 sm:order-3 ${
-                          TONO_ESTADO[p.estado] ?? 'bg-crema-profundo text-tinta'
+                          claseTono(tonoEstado[p.estado])
                         }`}
                       >
-                        {NOMBRE_ESTADO[p.estado] ?? p.estado}
+                        {nombreEstado[p.estado] ?? p.estado}
                       </span>
                     </div>
                     <span className="min-w-0 text-sm text-tinta sm:order-2 sm:flex-1 sm:truncate">

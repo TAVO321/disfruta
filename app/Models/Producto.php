@@ -15,12 +15,11 @@ class Producto extends Model
 {
     use GeneraSlug, HasFactory, SoftDeletes;
 
-    public const NIVELES_PICANTE = ['suave', 'medio', 'picante', 'muy-picante', 'infierno'];
-
     /**
      * Paleta de la ilustracion del frasco para productos sin tono propio.
-     * La columna es nullable y el formulario del panel no la maneja, asi que
-     * sin este default cualquier producto creado desde aca queda sin pintar.
+     * La columna es nullable y, aunque el formulario del panel la puede
+     * editar, lo normal es que la herede de su categoria; esta paleta es el
+     * ultimo recurso para que un frasco nunca se quede sin pintar.
      */
     public const TONO_POR_DEFECTO = [
         'fondo' => '#EFE3CC',
