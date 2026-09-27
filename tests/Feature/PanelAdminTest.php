@@ -11,6 +11,7 @@ use App\Models\Promocion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -110,6 +111,128 @@ class PanelAdminTest extends TestCase
         $this->assertNotSame('', $props['producto']['descripcion']);
         $this->assertNotNull($props['producto']['recomendacionConsumo']);
         $this->assertNotNull($props['producto']['conservacion']);
+    }
+
+    public function test_un_producto_nuevo_nace_con_la_paleta_del_frasco_completa(): void
+    {
+        $this->actingAs($this->admin);
+
+        // El formulario no manda tono. Sin este default la columna queda en
+        // null, la ilustracion revienta al desestructurarla y la pagina
+        // principal se queda solo con el fondo crema.
+        $this->post('/admin/productos', [
+            'nombre' => 'Producto Sin Tono',
+            'categoria_id' => Categoria::firstOrFail()->id,
+            'descripcion_corta' => 'Descripcion corta de prueba.',
+            'descripcion' => 'Descripcion completa de prueba con suficiente largo.',
+            'precio' => 25,
+            'presentacion' => 'Frasco 200 g',
+            'nivel_picante' => 'suave',
+            'stock' => 5,
+            'stock_minimo' => 2,
+            'peso' => 200,
+            'activo' => '1',
+            'destacado' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $tono = Producto::where('nombre', 'Producto Sin Tono')->firstOrFail()->tono;
+
+        $this->assertSame(Producto::TONO_POR_DEFECTO, $tono);
+    }
+
+    public function test_la_pagina_principal_manda_un_tono_completo_en_todos_los_productos(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->post('/admin/productos', [
+            'nombre' => 'Producto Para La Home',
+            'categoria_id' => Categoria::firstOrFail()->id,
+            'descripcion_corta' => 'Descripcion corta de prueba.',
+            'descripcion' => 'Descripcion completa de prueba con suficiente largo.',
+            'precio' => 30,
+            'presentacion' => 'Frasco 250 g',
+            'nivel_picante' => 'medio',
+            'stock' => 8,
+            'stock_minimo' => 2,
+            'peso' => 250,
+            'activo' => '1',
+            'destacado' => '1',
+        ])->assertSessionHasNoErrors();
+
+        // Inertia 3 entrega el page object en <script data-page="app"> y el
+        // helper assertInertia todavia no lo parsea, asi que se lee a mano.
+        preg_match(
+            '#<script data-page="app" type="application/json">(.*?)</script>#s',
+            $this->get('/')->assertOk()->getContent(),
+            $matches
+        );
+
+        $json = json_decode($matches[1] ?? '', true);
+        $this->assertIsArray($json, 'No se encontro el page object de Inertia en la home.');
+
+        $productos = $json['props']['productos'] ?? [];
+        $productos = is_array($productos['data'] ?? null) ? $productos['data'] : $productos;
+
+        $this->assertNotEmpty($productos);
+
+        // El Hero desestructura producto.tono en las tarjetas y en los frascos:
+        // un solo null aca tumbaba la pagina entera.
+        foreach ($productos as $producto) {
+            $this->assertIsArray($producto['tono'] ?? null, "El producto {$producto['id']} llego sin tono");
+            foreach (['fondo', 'contenido', 'acento', 'tapa'] as $clave) {
+                $this->assertNotEmpty(
+                    $producto['tono'][$clave] ?? null,
+                    "El producto {$producto['id']} llego sin el color {$clave}"
+                );
+            }
+        }
+    }
+
+    public function test_editar_un_producto_no_le_pisa_el_tono_que_ya_tenia(): void
+    {
+        $this->actingAs($this->admin);
+
+        $producto = Producto::firstOrFail();
+        $tonoOriginal = $producto->tono;
+
+        $this->assertIsArray($tonoOriginal);
+        $this->assertNotEmpty($tonoOriginal);
+
+        $this->put("/admin/productos/{$producto->id}", [
+            'nombre' => $producto->nombre,
+            'categoria_id' => $producto->categoria_id,
+            'descripcion_corta' => $producto->descripcion_corta,
+            'descripcion' => $producto->descripcion,
+            'precio' => $producto->precio,
+            'presentacion' => $producto->presentacion,
+            'nivel_picante' => $producto->nivel_picante,
+            'stock' => $producto->stock,
+            'stock_minimo' => $producto->stock_minimo,
+            'peso' => $producto->peso,
+            'activo' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame($tonoOriginal, $producto->fresh()->tono);
+    }
+
+    public function test_la_migracion_completa_el_tono_de_los_productos_que_lo_tenian_vacio(): void
+    {
+        $producto = Producto::firstOrFail();
+
+        // Se reproduce el estado roto: la columna tono en null, tal como
+        // quedaron los productos creados desde el panel.
+        DB::table('productos')->update(['tono' => null]);
+        $this->assertNull($producto->fresh()->tono);
+
+        // RefreshDatabase ya corrio las migraciones, asi que se invoca la
+        // migracion puntual en vez de correr todo migrate de nuevo.
+        $archivo = database_path('migrations/2026_09_27_191358_completa_el_tono_de_los_productos_sin_paleta.php');
+        $this->assertFileExists($archivo);
+
+        $migracion = require $archivo;
+        $migracion->up();
+
+        $this->assertSame(Producto::TONO_POR_DEFECTO, $producto->fresh()->tono);
     }
 
     public function test_crear_un_producto_lo_registra_en_el_catalogo(): void

@@ -7,10 +7,28 @@
  * la caja y recorta por el lado más largo, y en las cajas 3/4 o cuadradas de las
  * tarjetas eso se comía los círculos de los ingredientes de los costados.
  */
+const TONO_POR_DEFECTO = {
+  fondo: '#EFE3CC',
+  contenido: '#D9A441',
+  acento: '#A8762B',
+  tapa: '#1F3D2B',
+}
+
 export function IlustracionFrasco({ producto, className = '' }) {
-  const { fondo, contenido, acento, tapa } = producto.tono
+  // Un producto creado desde el panel nace con la columna tono en null, y
+  // desestructurar null aca tumbaba el arbol de React entero: la pagina se
+  // quedaba solo con el fondo crema. Un dato incompleto no puede romper la
+  // ilustracion, asi que cada color cae por separado a la paleta de la marca.
+  if (!producto) return null
+
+  const tono = producto.tono ?? {}
+  const fondo = tono.fondo ?? TONO_POR_DEFECTO.fondo
+  const contenido = tono.contenido ?? TONO_POR_DEFECTO.contenido
+  const acento = tono.acento ?? TONO_POR_DEFECTO.acento
+  const tapa = tono.tapa ?? TONO_POR_DEFECTO.tapa
   const id = `f-${producto.id}`
-  const sic = Math.min(producto.ingredientes.length, 7)
+  const ingredientes = Array.isArray(producto.ingredientes) ? producto.ingredientes : []
+  const sic = Math.min(ingredientes.length, 7)
 
   return (
     <svg

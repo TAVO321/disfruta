@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductoResource;
 use App\Models\Categoria;
+use App\Models\ImagenProducto;
 use App\Models\Producto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -119,6 +120,11 @@ class ProductoController extends Controller
             'combo' => ['boolean'],
             'destacado' => ['boolean'],
             'activo' => ['boolean'],
+            'tono' => ['nullable', 'array'],
+            'tono.fondo' => ['nullable', 'string', 'max:9'],
+            'tono.contenido' => ['nullable', 'string', 'max:9'],
+            'tono.acento' => ['nullable', 'string', 'max:9'],
+            'tono.tapa' => ['nullable', 'string', 'max:9'],
             'imagenes' => ['nullable', 'array', 'max:6'],
             'imagenes.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'imagenes_eliminadas' => ['nullable', 'array'],
@@ -134,7 +140,34 @@ class ProductoController extends Controller
 
         unset($datos['imagenes'], $datos['imagenes_eliminadas']);
 
+        $this->resolverTono($datos, $producto);
+
         return $datos;
+    }
+
+    /**
+     * La ilustracion del frasco se pinta con el array tono. El formulario no lo
+     * manda, asi que un producto nuevo quedaba con la columna en null y la
+     * pagina principal se caia entera al intentar desestructurarlo. Se respeta
+     * el tono que ya tiene el producto y solo se completa el que falta.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    private function resolverTono(array &$datos, ?Producto $producto): void
+    {
+        $enviado = $datos['tono'] ?? null;
+
+        if (is_array($enviado) && $enviado !== []) {
+            $datos['tono'] = array_merge(Producto::TONO_POR_DEFECTO, array_filter($enviado));
+
+            return;
+        }
+
+        $actual = $producto?->tono;
+
+        $datos['tono'] = is_array($actual) && $actual !== []
+            ? array_merge(Producto::TONO_POR_DEFECTO, $actual)
+            : Producto::TONO_POR_DEFECTO;
     }
 
     private function guardarImagenes(Request $request, Producto $producto): void
@@ -164,7 +197,7 @@ class ProductoController extends Controller
             return;
         }
 
-        $imagenes = \App\Models\ImagenProducto::whereIn('id', $ids)->get();
+        $imagenes = ImagenProducto::whereIn('id', $ids)->get();
 
         foreach ($imagenes as $imagen) {
             Storage::disk('public')->delete($imagen->ruta);

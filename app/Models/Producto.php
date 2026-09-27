@@ -17,12 +17,24 @@ class Producto extends Model
 
     public const NIVELES_PICANTE = ['suave', 'medio', 'picante', 'muy-picante', 'infierno'];
 
+    /**
+     * Paleta de la ilustracion del frasco para productos sin tono propio.
+     * La columna es nullable y el formulario del panel no la maneja, asi que
+     * sin este default cualquier producto creado desde aca queda sin pintar.
+     */
+    public const TONO_POR_DEFECTO = [
+        'fondo' => '#EFE3CC',
+        'contenido' => '#D9A441',
+        'acento' => '#A8762B',
+        'tapa' => '#1F3D2B',
+    ];
+
     protected $fillable = [
         'categoria_id', 'nombre', 'slug', 'descripcion_corta', 'descripcion',
         'precio', 'precio_antes', 'presentacion', 'nivel_picante', 'stock',
         'stock_minimo', 'peso', 'ingredientes', 'platos_recomendados',
         'recomendacion_consumo', 'conservacion', 'insignia', 'limitado',
-        'temporada', 'combo', 'destacado', 'activo',
+        'temporada', 'combo', 'destacado', 'activo', 'tono',
     ];
 
     protected function casts(): array
