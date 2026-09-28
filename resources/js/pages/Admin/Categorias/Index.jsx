@@ -121,6 +121,7 @@ export default function CategoriasIndex({ categorias }) {
               <li key={categoria.id} className="flex flex-wrap items-center gap-4 py-4 first:pt-0 last:pb-0">
                 <div className="h-20 w-20 shrink-0">
                   <IlustracionFrasco
+                    className="h-full w-full"
                     producto={{
                       id: categoria.id,
                       nombre: categoria.nombre,
@@ -195,6 +196,7 @@ export default function CategoriasIndex({ categorias }) {
               <div className="flex justify-center rounded-xl bg-crema p-3">
                 <div className="h-40 w-40">
                   <IlustracionFrasco
+                    className="h-full w-full"
                     producto={{
                       id: editando ?? 'nuevo',
                       nombre: data.nombre,
