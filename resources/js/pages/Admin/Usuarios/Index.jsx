@@ -3,10 +3,12 @@ import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { IconoCerrar, IconoMas, IconoUsuarioGrupo } from '@/components/Iconos'
 import { BotonAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 const VACIO = { name: '', email: '', password: '', is_admin: true }
 
 export default function UsuariosIndex({ usuarios, actual }) {
+  const { confirmar } = useConfirmacion()
   const [editando, setEditando] = useState(null)
   const [creando, setCreando] = useState(false)
 
@@ -74,8 +76,18 @@ export default function UsuariosIndex({ usuarios, actual }) {
                 {u.id !== actual && (
                   <BotonAdmin
                     variante="peligro"
-                    onClick={() => {
-                      if (!confirm(`¿Eliminar la cuenta de "${u.name}"?`)) return
+                    onClick={async () => {
+                      if (
+                        !(await confirmar({
+                          titulo: '¿Eliminar cuenta?',
+                          mensaje: `Se eliminará la cuenta de "${u.name}".`,
+                          confirmarTexto: 'Eliminar',
+                          cancelarTexto: 'Cancelar',
+                          variante: 'peligro',
+                        }))
+                      ) {
+                        return
+                      }
                       router.delete(`/admin/usuarios/${u.id}`, { preserveScroll: true })
                     }}
                   >

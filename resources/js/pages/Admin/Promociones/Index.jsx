@@ -2,12 +2,24 @@ import { Head, Link, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { MONEDA, fecha } from '@/lib/config'
 import { BotonAdmin, EnlaceAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 export default function PromocionesIndex({ promociones, tipos }) {
+  const { confirmar } = useConfirmacion()
   const nombreTipo = Object.fromEntries(tipos.map((t) => [t.id, t.nombre]))
 
-  const eliminar = (p) => {
-    if (!confirm(`¿Eliminar la promoción "${p.titulo}"?`)) return
+  const eliminar = async (p) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar promoción?',
+        mensaje: `Se eliminará "${p.titulo}".`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/promociones/${p.id}`, { preserveScroll: true })
   }
 

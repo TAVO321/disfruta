@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { claseTono } from '@/lib/config'
 import { BotonAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 /**
  * Los cuatro catalogos comparten la misma forma, asi que se dibujan con el
@@ -118,6 +119,7 @@ function usosDe(clave, mapas) {
 const CAMPOS_VACIOS = { nombre: '', emoji: '', chilis: 0, descripcion: '', tono: 'dorado' }
 
 function Catalogo({ catalogo, usos }) {
+  const { confirmar } = useConfirmacion()
   const { data, setData, post, put, processing, errors, clearErrors, reset } = useForm(CAMPOS_VACIOS)
   const [editando, setEditando] = useState(null)
 
@@ -167,8 +169,18 @@ function Catalogo({ catalogo, usos }) {
     )
   }
 
-  const eliminar = (fila) => {
-    if (!confirm(`¿Eliminar "${fila.nombre}" de ${catalogo.etiqueta}?`)) return
+  const eliminar = async (fila) => {
+    if (
+      !(await confirmar({
+        titulo: `¿Eliminar de ${catalogo.etiqueta}?`,
+        mensaje: `Se eliminará "${fila.nombre}" de ${catalogo.etiqueta}.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/catalogos/${catalogo.clave}/${fila.id}`, { preserveScroll: true })
   }
 

@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { Head, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { fecha, precio } from '@/lib/config'
-import { BotonAdmin } from '@/components/BotonAdmin'
+import { linkWhatsApp } from '@/lib/whatsapp'
+import { BotonAdmin, EnlaceAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 export default function ClientesIndex({ clientes, filtros }) {
+  const { confirmar } = useConfirmacion()
   const [q, setQ] = useState(filtros.q ?? '')
 
   useEffect(() => setQ(filtros.q ?? ''), [filtros.q])
@@ -19,9 +22,24 @@ export default function ClientesIndex({ clientes, filtros }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q])
 
-  const eliminar = (cliente) => {
-    if (!confirm(`¿Eliminar a ${cliente.nombre}? Sus pedidos quedan sin cliente asignado.`)) return
+  const eliminar = async (cliente) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar cliente?',
+        mensaje: `Se eliminará a ${cliente.nombre}. Sus pedidos quedarán sin cliente asignado.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/clientes/${cliente.id}`, { preserveScroll: true })
+  }
+
+  const enlaceWhatsAppCliente = (cliente) => {
+    const mensaje = encodeURIComponent(`Hola ${cliente.nombre}, te escribo de DISFRUTA.`)
+    return linkWhatsApp(mensaje, cliente.telefono)
   }
 
   const items = clientes.data ?? []
@@ -78,15 +96,17 @@ export default function ClientesIndex({ clientes, filtros }) {
                     <td className="py-3 text-xs text-tinta-suave">{fecha(c.ultimo)}</td>
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-1.5">
-                        <a
-                          href={`tel:${c.telefono.replace(/\s/g, '')}`}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-crema hover:text-verde"
+                        <EnlaceAdmin
+                          variante="contornoVerde"
+                          href={enlaceWhatsAppCliente(c) ?? '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          Llamar
-                        </a>
-                  <BotonAdmin variante="peligro" onClick={() => eliminar(c)}>
-                    Eliminar
-                  </BotonAdmin>
+                          WhatsApp
+                        </EnlaceAdmin>
+                        <BotonAdmin variante="peligro" onClick={() => eliminar(c)}>
+                          Eliminar
+                        </BotonAdmin>
                       </div>
                     </td>
                   </tr>

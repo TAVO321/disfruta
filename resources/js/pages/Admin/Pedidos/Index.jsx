@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { BotonAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 import { claseTono, fechaHora, precio } from '@/lib/config'
 import { linkWhatsApp } from '@/lib/whatsapp'
 
 export default function PedidosIndex({ pedidos, estados, filtros }) {
+  const { confirmar } = useConfirmacion()
   const nombreEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.nombre]))
   const tonoEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.tono]))
   const [q, setQ] = useState(filtros.q ?? '')
@@ -54,8 +56,18 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
     })
   }
 
-  const eliminar = (pedido) => {
-    if (!confirm(`¿Eliminar el pedido #${pedido.id} de ${pedido.cliente}?`)) return
+  const eliminar = async (pedido) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar pedido?',
+        mensaje: `Se eliminará el pedido #${pedido.id} de ${pedido.cliente}.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/pedidos/${pedido.id}`, { preserveScroll: true })
   }
 

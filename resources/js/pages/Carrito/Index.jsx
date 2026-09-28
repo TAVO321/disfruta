@@ -8,10 +8,12 @@ import { precio } from '@/lib/config'
 import { linkWhatsApp, mensajeWhatsApp } from '@/lib/whatsapp'
 import { useEsDesktop } from '@/lib/useEsDesktop'
 import { useCarrito } from '@/context/Carrito'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 const CAMPOS_VACIOS = { nombre: '', telefono: '', zona: '', notas: '' }
 
 export default function CarritoIndex() {
+  const { confirmar: pedirConfirmacion } = useConfirmacion()
   const { items, total, cambiarCantidad, eliminar, vaciar } = useCarrito()
   const { ajustes } = usePage().props
   const esDesktop = useEsDesktop()
@@ -92,7 +94,11 @@ export default function CarritoIndex() {
           {!vacio && (
             <button
               type="button"
-              onClick={() => confirm('Vaciar el carrito?') && vaciar()}
+              onClick={async () => {
+                if (await pedirConfirmacion({ titulo: 'Vaciar carrito', mensaje: '¿Quitar todos los productos del carrito?' })) {
+                  vaciar()
+                }
+              }}
               className="text-xs text-tinta-suave underline-offset-4 hover:text-rojo hover:underline"
             >
               Vaciar carrito

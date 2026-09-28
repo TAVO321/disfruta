@@ -4,9 +4,11 @@ import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { ImagenProducto } from '@/components/ProductoUI'
 import { IconoBuscar, IconoCerrar } from '@/components/Iconos'
 import { BotonAdmin, EnlaceAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 import { precio } from '@/lib/config'
 
 export default function ProductosIndex({ productos, categorias, filtros }) {
+  const { confirmar } = useConfirmacion()
   const [q, setQ] = useState(filtros.q ?? '')
 
   useEffect(() => setQ(filtros.q ?? ''), [filtros.q])
@@ -28,8 +30,18 @@ export default function ProductosIndex({ productos, categorias, filtros }) {
   const items = productos.data ?? []
   const meta = productos.meta ?? {}
 
-  const eliminar = (producto) => {
-    if (!confirm(`¿Eliminar "${producto.nombre}"? Se perderá en el catálogo.`)) return
+  const eliminar = async (producto) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar producto?',
+        mensaje: `Se eliminará "${producto.nombre}" del catálogo.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/productos/${producto.id}`, { preserveScroll: true })
   }
 

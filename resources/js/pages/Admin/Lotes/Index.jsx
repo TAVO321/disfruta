@@ -3,6 +3,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { fecha } from '@/lib/config'
 import { BotonAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 const VACIO = {
   producto_id: '',
@@ -14,6 +15,7 @@ const VACIO = {
 }
 
 export default function LotesIndex({ lotes, productos, filtros }) {
+  const { confirmar } = useConfirmacion()
   const { data, setData, post, processing, errors, reset } = useForm({ ...VACIO })
   const [editando, setEditando] = useState(null)
 
@@ -54,8 +56,18 @@ export default function LotesIndex({ lotes, productos, filtros }) {
     post('/admin/lotes', opciones)
   }
 
-  const eliminar = (lote) => {
-    if (!confirm(`¿Eliminar el lote ${lote.codigo}? El stock del producto se recalcula.`)) return
+  const eliminar = async (lote) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar lote?',
+        mensaje: `Se eliminará el lote ${lote.codigo}. El stock del producto se recalculará.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/lotes/${lote.id}`, { preserveScroll: true })
   }
 

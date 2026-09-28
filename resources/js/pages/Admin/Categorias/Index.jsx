@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { IlustracionFrasco } from '@/components/FrascoIlustrado'
 import { BotonAdmin } from '@/components/BotonAdmin'
+import { useConfirmacion } from '@/context/Confirmacion'
 
 const CAMPOS_VACIOS = {
   nombre: '',
@@ -19,6 +20,7 @@ const COLORES = [
 ]
 
 export default function CategoriasIndex({ categorias }) {
+  const { confirmar } = useConfirmacion()
   const { data, setData, post, put, processing, errors, reset } = useForm(CAMPOS_VACIOS)
   const [editando, setEditando] = useState(null)
 
@@ -62,11 +64,14 @@ export default function CategoriasIndex({ categorias }) {
       { preserveScroll: true },
     )
 
-  const aplicarTono = (categoria) => {
+  const aplicarTono = async (categoria) => {
     if (
-      !confirm(
-        `Se repintarán ${categoria.productos_count} producto(s) de "${categoria.nombre}" con su color actual. ¿Seguir?`,
-      )
+      !(await confirmar({
+        titulo: 'Aplicar color',
+        mensaje: `Se repintarán ${categoria.productos_count} producto(s) de "${categoria.nombre}" con su color actual. ¿Seguir?`,
+        confirmarTexto: 'Repintar',
+        cancelarTexto: 'Cancelar',
+      }))
     ) {
       return
     }
@@ -74,8 +79,18 @@ export default function CategoriasIndex({ categorias }) {
     router.patch(`/admin/categorias/${categoria.id}/aplicar-tono`, {}, { preserveScroll: true })
   }
 
-  const eliminar = (categoria) => {
-    if (!confirm(`¿Eliminar la familia "${categoria.nombre}"?`)) return
+  const eliminar = async (categoria) => {
+    if (
+      !(await confirmar({
+        titulo: '¿Eliminar familia?',
+        mensaje: `Se eliminará "${categoria.nombre}" del catálogo.`,
+        confirmarTexto: 'Eliminar',
+        cancelarTexto: 'Cancelar',
+        variante: 'peligro',
+      }))
+    ) {
+      return
+    }
     router.delete(`/admin/categorias/${categoria.id}`, { preserveScroll: true })
   }
 

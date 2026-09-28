@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { ProveedorCarrito } from '@/context/Carrito'
+import { ConfirmacionProvider } from '@/context/Confirmacion'
 import LayoutPublico from '@/layouts/LayoutPublico'
 import LayoutAdmin from '@/layouts/LayoutAdmin'
 
@@ -41,7 +42,9 @@ createInertiaApp({
   setup({ el, App, props }) {
     createRoot(el).render(
       <ProveedorCarrito>
-        <App {...props} />
+        <ConfirmacionProvider>
+          <App {...props} />
+        </ConfirmacionProvider>
       </ProveedorCarrito>,
     )
   },

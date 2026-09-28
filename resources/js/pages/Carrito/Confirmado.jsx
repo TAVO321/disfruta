@@ -14,6 +14,12 @@ export default function Confirmado({ pedido }) {
     vaciar()
   }, [vaciar])
 
+  // Al volver desde WhatsApp el navegador restaura el scroll anterior; nosotros
+  // queremos mostrar siempre el encabezado de confirmacion.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [])
+
   const lineas = pedido.items
     .map(
       (item, i) =>
