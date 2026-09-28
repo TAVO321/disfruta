@@ -154,7 +154,7 @@ function Catalogo({ catalogo, usos }) {
 
   const editar = (fila) => {
     setEditando(fila.id)
-    reset(
+    setData(
       Object.fromEntries(
         campos.map((c) => [c.clave, fila[c.clave] ?? (c.clave === 'tono' ? 'dorado' : c.clave === 'chilis' ? 0 : '')]),
       ),
