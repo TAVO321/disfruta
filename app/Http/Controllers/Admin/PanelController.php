@@ -24,12 +24,22 @@ class PanelController extends Controller
             ->limit(8)
             ->get();
 
+        // Un solo GROUP BY reemplaza cuatro conteos/sumas por estado.
+        $pedidosPorEstado = Pedido::query()
+            ->selectRaw('estado, COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN estado NOT IN ("cancelado") THEN total ELSE 0 END) as facturado')
+            ->groupBy('estado')
+            ->get()
+            ->keyBy('estado');
+
+        $contar = fn (string $estado): int => (int) ($pedidosPorEstado[$estado]->total ?? 0);
+
         return Inertia::render('Admin/Panel', [
             'resumen' => [
-                'pedidos_nuevos' => Pedido::where('estado', 'nuevo')->count(),
-                'pedidos_activos' => Pedido::whereIn('estado', ['nuevo', 'confirmado', 'preparando'])->count(),
-                'entregados' => Pedido::where('estado', 'entregado')->count(),
-                'facturado' => (float) Pedido::whereNotIn('estado', ['cancelado'])->sum('total'),
+                'pedidos_nuevos' => $contar('nuevo'),
+                'pedidos_activos' => $contar('nuevo') + $contar('confirmado') + $contar('preparando'),
+                'entregados' => $contar('entregado'),
+                'facturado' => (float) $pedidosPorEstado->sum('facturado'),
                 'productos' => Producto::activos()->count(),
                 'clientes' => Cliente::count(),
                 'promociones' => Promocion::vigentes()->count(),
@@ -37,7 +47,7 @@ class PanelController extends Controller
             'ultimos_pedidos' => PedidoResource::collection(
                 Pedido::with('items')->latest()->limit(6)->get()
             ),
-            'estadosPedido' => EstadoPedido::catalogo(),
+            'estadosPedido' => EstadoPedido::catalogoCacheado(),
             'stock_critico' => ProductoResource::collection($stockCritico),
             'top_productos' => DB::table('pedido_items')
                 ->join('pedidos', 'pedidos.id', '=', 'pedido_items.pedido_id')

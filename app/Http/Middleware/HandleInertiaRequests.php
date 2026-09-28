@@ -29,14 +29,13 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()?->only('id', 'name', 'email', 'is_admin'),
             ],
 
-            // El scope activas() ya ordena por orden.
-            'categorias' => fn () => Categoria::activas()
-                ->get(['id', 'slug', 'nombre', 'tono'])
-                ->all(),
+            // Catálogos inmutables cacheados: se leen una vez por TTL y se
+            // invalidan al editar cualquier valor desde el panel.
+            'categorias' => fn () => Categoria::catalogoCacheado(),
 
-            'platos' => fn () => Plato::catalogo(),
+            'platos' => fn () => Plato::catalogoCacheado(),
 
-            'niveles' => fn () => NivelPicante::catalogo(),
+            'niveles' => fn () => NivelPicante::catalogoCacheado(),
 
             'ajustes' => function () {
                 $valores = Ajuste::todos();

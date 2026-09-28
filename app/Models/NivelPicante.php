@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CatalogoCacheable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class NivelPicante extends Model
 {
+    use CatalogoCacheable;
+
     protected $table = 'niveles_picante';
 
     public $incrementing = false;
@@ -39,8 +42,10 @@ class NivelPicante extends Model
      * busca el nivel por id y dibuja tantos chilis como indique, asi que `orden`
      * solo hace falta para ordenar la consulta y `descripcion` no se usa.
      */
-    public static function catalogo()
+    public static function catalogo(): array
     {
-        return static::query()->activos()->get(['id', 'nombre', 'chilis']);
+        return static::query()->activos()->get(['id', 'nombre', 'chilis'])
+            ->map(fn (self $n) => $n->only(['id', 'nombre', 'chilis']))
+            ->all();
     }
 }

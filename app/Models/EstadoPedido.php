@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CatalogoCacheable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class EstadoPedido extends Model
 {
+    use CatalogoCacheable;
+
     protected $table = 'estados_pedido';
 
     public $incrementing = false;
@@ -47,8 +50,10 @@ class EstadoPedido extends Model
     /**
      * Catalogo que se comparte al frontend como prop de Inertia.
      */
-    public static function catalogo()
+    public static function catalogo(): array
     {
-        return static::query()->activos()->get(['id', 'nombre', 'tono', 'orden']);
+        return static::query()->activos()->get(['id', 'nombre', 'tono', 'orden'])
+            ->map(fn (self $e) => $e->only(['id', 'nombre', 'tono', 'orden']))
+            ->all();
     }
 }

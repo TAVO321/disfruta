@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CatalogoCacheable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class TipoPromocion extends Model
 {
+    use CatalogoCacheable;
+
     protected $table = 'tipos_promocion';
 
     public $incrementing = false;
@@ -37,8 +40,10 @@ class TipoPromocion extends Model
     /**
      * Catalogo que se comparte al frontend como prop de Inertia.
      */
-    public static function catalogo()
+    public static function catalogo(): array
     {
-        return static::query()->activos()->get(['id', 'nombre', 'descripcion', 'orden']);
+        return static::query()->activos()->get(['id', 'nombre', 'descripcion', 'orden'])
+            ->map(fn (self $t) => $t->only(['id', 'nombre', 'descripcion', 'orden']))
+            ->all();
     }
 }

@@ -10,17 +10,20 @@ use App\Models\Plato;
 use App\Models\Producto;
 use App\Models\Promocion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TiendaController extends Controller
 {
+    private const FACETAS_TTL = 300;
+
     public function home(): Response
     {
         return Inertia::render('Home', [
             'productos' => ProductoResource::collection(
-                Producto::conRelaciones()->activos()->latest()->get()
+                Producto::conRelaciones()->activos()->latest()->limit(12)->get()
             ),
             'promociones' => PromocionResource::collection(
                 Promocion::vigentes()
@@ -88,25 +91,9 @@ class TiendaController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $niveles = NivelPicante::catalogo();
-        $listaPlatos = Plato::catalogo();
-
-        // Los conteos de facetas se resuelven con una consulta por tipo en vez
-        // de una por cada valor, para no crecer con el catalogo.
-        $conteosPorNivel = Producto::activos()
-            ->selectRaw('nivel_picante, COUNT(*) as total')
-            ->groupBy('nivel_picante')
-            ->pluck('total', 'nivel_picante');
-
-        $conteosPorPlato = Producto::activos()
-            ->whereNotNull('platos_recomendados')
-            ->pluck('platos_recomendados')
-            ->flatMap(fn ($lista) => $lista ?? [])
-            ->countBy();
-
-        $precios = Producto::activos()
-            ->selectRaw('MIN(precio) as minimo, MAX(precio) as maximo')
-            ->first();
+        $niveles = NivelPicante::catalogoCacheado();
+        $listaPlatos = Plato::catalogoCacheado();
+        $facetas = static::facetasCatalogo();
 
         return Inertia::render('Catalogo/Index', [
             'productos' => ProductoResource::collection($productos),
@@ -121,28 +108,60 @@ class TiendaController extends Controller
                 'precio_max' => isset($filtros['precio_max']) ? (float) $filtros['precio_max'] : null,
                 'orden' => $orden,
             ],
-            'precios' => [
-                'min' => (float) ($precios->minimo ?? 0),
-                'max' => (float) ($precios->maximo ?? 1),
-            ],
+            'precios' => $facetas['precios'],
             'conteos' => [
-                'total' => (clone $base)->count(),
-                'categorias' => Categoria::activas()
-                    ->withCount(['productos' => fn ($q) => $q->where('activo', true)])
-                    ->orderBy('orden')
-                    ->get()
-                    ->map(fn ($c) => ['slug' => $c->slug, 'nombre' => $c->nombre, 'total' => $c->productos_count]),
+                'total' => $facetas['total'],
+                'categorias' => $facetas['categorias'],
                 'picantes' => collect($niveles)
                     ->mapWithKeys(fn ($nivel) => [
-                        $nivel['id'] => (int) ($conteosPorNivel[$nivel['id']] ?? 0),
+                        $nivel['id'] => (int) ($facetas['conteos_por_nivel'][$nivel['id']] ?? 0),
                     ]),
                 'platos' => collect($listaPlatos)
                     ->mapWithKeys(fn ($plato) => [
-                        $plato['id'] => (int) ($conteosPorPlato[$plato['id']] ?? 0),
+                        $plato['id'] => (int) ($facetas['conteos_por_plato'][$plato['id']] ?? 0),
                     ])
                     ->filter(fn ($n) => $n > 0),
             ],
         ]);
+    }
+
+    /**
+     * Facetas del catalogo: total, categorias, precios y conteos por nivel y
+     * plato. Se cachean unos minutos porque solo cambian cuando varian los
+     * productos o categorias; esos modelos invalidan la clave al guardar.
+     */
+    private static function facetasCatalogo(): array
+    {
+        return Cache::remember('catalogo:facetas', self::FACETAS_TTL, function () {
+            $precios = Producto::activos()
+                ->selectRaw('MIN(precio) as minimo, MAX(precio) as maximo')
+                ->first();
+
+            return [
+                'total' => Producto::activos()->count(),
+                'precios' => [
+                    'min' => (float) ($precios->minimo ?? 0),
+                    'max' => (float) ($precios->maximo ?? 1),
+                ],
+                'categorias' => Categoria::activas()
+                    ->withCount(['productos' => fn ($q) => $q->where('activo', true)])
+                    ->orderBy('orden')
+                    ->get()
+                    ->map(fn ($c) => ['slug' => $c->slug, 'nombre' => $c->nombre, 'total' => $c->productos_count])
+                    ->all(),
+                'conteos_por_nivel' => Producto::activos()
+                    ->selectRaw('nivel_picante, COUNT(*) as total')
+                    ->groupBy('nivel_picante')
+                    ->pluck('total', 'nivel_picante')
+                    ->all(),
+                'conteos_por_plato' => Producto::activos()
+                    ->whereNotNull('platos_recomendados')
+                    ->pluck('platos_recomendados')
+                    ->flatMap(fn ($lista) => $lista ?? [])
+                    ->countBy()
+                    ->all(),
+            ];
+        });
     }
 
     public function detalle(Producto $producto): Response
@@ -174,7 +193,7 @@ class TiendaController extends Controller
                     ->get()
             ),
             'productos' => ProductoResource::collection(
-                Producto::conRelaciones()->activos()->latest()->get()
+                Producto::conRelaciones()->activos()->latest()->limit(12)->get()
             ),
         ]);
     }

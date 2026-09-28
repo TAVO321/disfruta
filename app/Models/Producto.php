@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Producto extends Model
 {
@@ -53,6 +54,12 @@ class Producto extends Model
             'destacado' => 'boolean',
             'activo' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('catalogo:facetas'));
+        static::deleted(fn () => Cache::forget('catalogo:facetas'));
     }
 
     public function categoria(): BelongsTo

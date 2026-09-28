@@ -27,7 +27,7 @@ class PedidoController extends Controller
 
         return Inertia::render('Admin/Pedidos/Index', [
             'pedidos' => PedidoResource::collection($pedidos),
-            'estados' => EstadoPedido::catalogo(),
+            'estados' => EstadoPedido::catalogoCacheado(),
             'filtros' => $request->only('q', 'estado'),
         ]);
     }

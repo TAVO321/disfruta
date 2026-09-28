@@ -33,7 +33,7 @@ class PromocionController extends Controller
                     'vigente' => $p->estaVigente(),
                     'productos_total' => $p->productos_count,
                 ]),
-            'tipos' => TipoPromocion::catalogo(),
+            'tipos' => TipoPromocion::catalogoCacheado(),
         ]);
     }
 
@@ -106,7 +106,7 @@ class PromocionController extends Controller
                 'vigente_hasta' => $promocion->vigente_hasta?->toDateString(),
                 'productos' => $promocion->productos()->pluck('productos.id')->all(),
             ] : null,
-            'tipos' => TipoPromocion::catalogo(),
+            'tipos' => TipoPromocion::catalogoCacheado(),
             'productos' => Producto::orderBy('nombre')->get(['id', 'nombre', 'precio']),
         ]);
     }

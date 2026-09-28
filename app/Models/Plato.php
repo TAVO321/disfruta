@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CatalogoCacheable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Plato extends Model
 {
+    use CatalogoCacheable;
+
     public $incrementing = false;
 
     protected $keyType = 'string';
@@ -36,8 +39,10 @@ class Plato extends Model
      * Catalogo que se comparte al frontend como prop de Inertia. El frontend
      * filtra por id y muestra nombre y emoji; `orden` solo ordena la consulta.
      */
-    public static function catalogo()
+    public static function catalogo(): array
     {
-        return static::query()->activos()->get(['id', 'nombre', 'emoji']);
+        return static::query()->activos()->get(['id', 'nombre', 'emoji'])
+            ->map(fn (self $p) => $p->only(['id', 'nombre', 'emoji']))
+            ->all();
     }
 }
