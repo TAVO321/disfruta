@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { IconoCerrar, IconoMas, IconoUsuarioGrupo } from '@/components/Iconos'
+import { BotonAdmin } from '@/components/BotonAdmin'
 
 const VACIO = { name: '', email: '', password: '', is_admin: true }
 
@@ -61,27 +62,25 @@ export default function UsuariosIndex({ usuarios, actual }) {
               )}
 
               <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
+                <BotonAdmin
+                  variante="contornoVerde"
                   onClick={() => {
                     setCreando(false)
                     setEditando(u)
                   }}
-                  className="rounded-lg border border-crema-oscuro px-3.5 py-2 text-xs font-semibold text-verde transition-colors hover:border-verde"
                 >
                   Editar
-                </button>
+                </BotonAdmin>
                 {u.id !== actual && (
-                  <button
-                    type="button"
+                  <BotonAdmin
+                    variante="peligro"
                     onClick={() => {
                       if (!confirm(`¿Eliminar la cuenta de "${u.name}"?`)) return
                       router.delete(`/admin/usuarios/${u.id}`, { preserveScroll: true })
                     }}
-                    className="rounded-lg border border-rojo/30 px-3.5 py-2 text-xs font-semibold text-rojo transition-colors hover:border-rojo"
                   >
                     Eliminar
-                  </button>
+                  </BotonAdmin>
                 )}
               </div>
             </li>

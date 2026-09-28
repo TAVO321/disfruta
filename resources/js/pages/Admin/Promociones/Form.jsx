@@ -31,18 +31,15 @@ export default function PromocionesForm({ promocion, tipos, productos }) {
 
   const guardar = (e) => {
     e.preventDefault()
-    const fd = new FormData()
-    fd.set('titulo', data.titulo)
-    fd.set('descripcion', data.descripcion)
-    fd.set('tipo', data.tipo)
-    fd.set('descuento', data.descuento)
-    fd.set('activa', data.activa ? '1' : '0')
-    fd.set('vigente_desde', data.vigente_desde)
-    fd.set('vigente_hasta', data.vigente_hasta ?? '')
-    data.productos.forEach((id) => fd.append('productos[]', id))
-    if (editando) fd.set('_method', 'PUT')
+    // useForm manda dataRef.current como payload: un FormData armado aparte se
+    // pierde, y con el se perdia tambien el spoof de _method al editar.
+    if (editando) {
+      setData({ ...data, _method: 'PUT' })
+      post(`/admin/promociones/${data.id}`)
+      return
+    }
 
-    post(editando ? `/admin/promociones/${data.id}` : '/admin/promociones', fd)
+    post('/admin/promociones')
   }
 
   const seleccionados = productos.filter((p) => data.productos.includes(p.id))

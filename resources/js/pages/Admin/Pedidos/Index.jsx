@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Head, Link, router, useForm } from '@inertiajs/react'
+import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
+import { BotonAdmin } from '@/components/BotonAdmin'
 import { claseTono, fechaHora, precio } from '@/lib/config'
 import { linkWhatsApp } from '@/lib/whatsapp'
 
@@ -8,7 +9,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
   const nombreEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.nombre]))
   const tonoEstado = Object.fromEntries((estados ?? []).map((e) => [e.id, e.tono]))
   const [q, setQ] = useState(filtros.q ?? '')
-  const { data, setData, patch, processing, errors } = useForm({ estado: '' })
+  const { data, setData, patch, processing, errors, clearErrors } = useForm({ estado: '' })
   const [editando, setEditando] = useState(null)
 
   useEffect(() => setQ(filtros.q ?? ''), [filtros.q])
@@ -30,11 +31,27 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q])
 
-  const cambiarEstado = (pedido) => {
+  // El select es un solo formulario para toda la pagina, asi que se carga al
+  // ABRIR el pedido, no al guardar. Antes se seteaba dentro de cambiarEstado:
+  // setData de Inertia escribe el ref al instante y submit lee de ese ref, asi
+  // que el PATCH mandaba el estado viejo del pedido y el cambio nunca se veia.
+  const abrir = (pedido) => {
+    if (editando === pedido.id) {
+      setEditando(null)
+      return
+    }
+
     setEditando(pedido.id)
     setData('estado', pedido.estado)
+    clearErrors('estado')
+  }
+
+  const guardarEstado = (pedido) => {
     // La ruta de estado solo admite PATCH: con POST devolvia 405.
-    patch(`/admin/pedidos/${pedido.id}/estado`, { preserveScroll: true })
+    patch(`/admin/pedidos/${pedido.id}/estado`, {
+      preserveScroll: true,
+      onSuccess: () => clearErrors('estado'),
+    })
   }
 
   const eliminar = (pedido) => {
@@ -138,7 +155,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
 
                   <button
                     type="button"
-                    onClick={() => setEditando(abierto ? null : p.id)}
+                    onClick={() => abrir(p)}
                     className="w-full shrink-0 rounded-lg border border-crema-profundo px-3 py-2 text-sm font-semibold text-tinta hover:border-verde hover:text-verde sm:order-5 sm:w-auto sm:border-0 sm:px-2.5 sm:py-1.5 sm:text-xs sm:text-tinta-suave sm:hover:bg-crema"
                   >
                     {abierto ? 'Ocultar' : 'Gestionar'}
@@ -190,7 +207,7 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
 
                       <button
                         type="button"
-                        onClick={() => cambiarEstado(p)}
+                        onClick={() => guardarEstado(p)}
                         disabled={processing}
                         className="w-full rounded-full bg-verde px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-medio disabled:opacity-50 sm:w-auto"
                       >
@@ -211,13 +228,14 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                         WhatsApp
                       </a>
 
-                      <button
-                        type="button"
+                      <BotonAdmin
+                        variante="peligro"
+                        tamano="bloque"
                         onClick={() => eliminar(p)}
-                        className="w-full rounded-full border border-crema-profundo px-4 py-2.5 text-xs font-semibold text-tinta-suave hover:border-rojo hover:bg-rojo hover:text-crema sm:ml-auto sm:w-auto"
+                        className="sm:ml-auto sm:w-auto"
                       >
                         Eliminar pedido
-                      </button>
+                      </BotonAdmin>
                     </div>
                   </div>
                 )}

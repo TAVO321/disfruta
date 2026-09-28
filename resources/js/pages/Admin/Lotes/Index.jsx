@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Head, Link, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { fecha } from '@/lib/config'
+import { BotonAdmin } from '@/components/BotonAdmin'
 
 const VACIO = {
   producto_id: '',
@@ -38,15 +39,19 @@ export default function LotesIndex({ lotes, productos, filtros }) {
 
   const enviar = (e) => {
     e.preventDefault()
-    // Inertia manda POST y la ruta update es PUT: va spoofeada en el body.
+    // useForm manda dataRef.current: el cuerpo va en el form y las opciones
+    // en el segundo argumento. Un tercer argumento (o onSuccess mezclado en
+    // los datos) se pierde y el reset posterior nunca corre.
+    const opciones = { onSuccess: abrirNuevo }
+
     if (editando) {
-      const fd = new FormData()
-      Object.entries(data).forEach(([k, v]) => fd.append(k, v ?? ''))
-      fd.set('_method', 'PUT')
-      post(`/admin/lotes/${editando}`, fd, { onSuccess: abrirNuevo })
+      // Inertia manda POST y la ruta update es PUT: va spoofeada en el body.
+      setData({ ...data, _method: 'PUT' })
+      post(`/admin/lotes/${editando}`, opciones)
       return
     }
-    post('/admin/lotes', { ...data, onSuccess: abrirNuevo })
+
+    post('/admin/lotes', opciones)
   }
 
   const eliminar = (lote) => {
@@ -271,20 +276,12 @@ export default function LotesIndex({ lotes, productos, filtros }) {
                     </dl>
 
                     <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => editar(l)}
-                        className="flex-1 rounded-lg bg-verde px-3 py-2 text-xs font-semibold text-crema hover:bg-verde-medio"
-                      >
+                      <BotonAdmin variante="primario" onClick={() => editar(l)} className="flex-1">
                         Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => eliminar(l)}
-                        className="flex-1 rounded-lg border border-crema-profundo px-3 py-2 text-xs font-semibold text-tinta-suave hover:border-rojo hover:bg-rojo hover:text-crema"
-                      >
+                      </BotonAdmin>
+                      <BotonAdmin variante="peligro" onClick={() => eliminar(l)} className="flex-1">
                         Eliminar
-                      </button>
+                      </BotonAdmin>
                     </div>
                   </li>
                 ))}
@@ -331,20 +328,12 @@ export default function LotesIndex({ lotes, productos, filtros }) {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => editar(l)}
-                            className="rounded-lg bg-verde px-2.5 py-1.5 text-xs font-semibold text-crema hover:bg-verde-medio"
-                          >
+                          <BotonAdmin variante="primario" onClick={() => editar(l)}>
                             Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => eliminar(l)}
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-rojo hover:text-crema"
-                          >
+                          </BotonAdmin>
+                          <BotonAdmin variante="peligro" onClick={() => eliminar(l)}>
                             Eliminar
-                          </button>
+                          </BotonAdmin>
                         </div>
                       </td>
                     </tr>

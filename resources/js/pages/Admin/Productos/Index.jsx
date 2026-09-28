@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { ImagenProducto } from '@/components/ProductoUI'
 import { IconoBuscar, IconoCerrar } from '@/components/Iconos'
+import { BotonAdmin, EnlaceAdmin } from '@/components/BotonAdmin'
 import { precio } from '@/lib/config'
 
 export default function ProductosIndex({ productos, categorias, filtros }) {
@@ -155,25 +156,15 @@ export default function ProductosIndex({ productos, categorias, filtros }) {
                     </td>
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Link
-                          href={`/catalogo/${p.slug}`}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-crema hover:text-verde"
-                        >
+                        <EnlaceAdmin variante="suave" href={`/catalogo/${p.slug}`}>
                           Ver
-                        </Link>
-                        <Link
-                          href={`/admin/productos/${p.id}/edit`}
-                          className="rounded-lg bg-verde px-2.5 py-1.5 text-xs font-semibold text-crema hover:bg-verde-medio"
-                        >
+                        </EnlaceAdmin>
+                        <EnlaceAdmin variante="primario" href={`/admin/productos/${p.id}/edit`}>
                           Editar
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => eliminar(p)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-rojo hover:text-crema"
-                        >
+                        </EnlaceAdmin>
+                        <BotonAdmin variante="peligro" onClick={() => eliminar(p)}>
                           Eliminar
-                        </button>
+                        </BotonAdmin>
                       </div>
                     </td>
                   </tr>

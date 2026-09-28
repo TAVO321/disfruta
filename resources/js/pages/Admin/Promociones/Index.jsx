@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { MONEDA, fecha } from '@/lib/config'
+import { BotonAdmin, EnlaceAdmin } from '@/components/BotonAdmin'
 
 export default function PromocionesIndex({ promociones, tipos }) {
   const nombreTipo = Object.fromEntries(tipos.map((t) => [t.id, t.nombre]))
@@ -92,26 +93,15 @@ export default function PromocionesIndex({ promociones, tipos }) {
                 </span>
 
                 <div className="ml-auto flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => alternar(p)}
-                    className="rounded-lg border border-crema-profundo px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:border-verde hover:text-verde"
-                  >
+                  <BotonAdmin variante="contorno" onClick={() => alternar(p)}>
                     {p.activa ? 'Desactivar' : 'Activar'}
-                  </button>
-                  <Link
-                    href={`/admin/promociones/${p.id}/edit`}
-                    className="rounded-lg bg-verde px-2.5 py-1.5 text-xs font-semibold text-crema hover:bg-verde-medio"
-                  >
+                  </BotonAdmin>
+                  <EnlaceAdmin variante="primario" href={`/admin/promociones/${p.id}/edit`}>
                     Editar
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => eliminar(p)}
-                    className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-rojo hover:text-crema"
-                  >
+                  </EnlaceAdmin>
+                  <BotonAdmin variante="peligro" onClick={() => eliminar(p)}>
                     Eliminar
-                  </button>
+                  </BotonAdmin>
                 </div>
               </div>
             </li>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { IlustracionFrasco } from '@/components/FrascoIlustrado'
+import { BotonAdmin } from '@/components/BotonAdmin'
 
 const CAMPOS_VACIOS = {
   nombre: '',
@@ -112,20 +113,16 @@ export default function CategoriasIndex({ categorias }) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => editar(categoria)}
-                    className="rounded-full border border-crema-profundo px-3 py-1.5 text-xs font-medium text-tinta transition-colors hover:border-verde"
-                  >
+                  <BotonAdmin variante="contorno" onClick={() => editar(categoria)}>
                     Editar
-                  </button>
-                  <button
-                    type="button"
+                  </BotonAdmin>
+                  <BotonAdmin
+                    variante="contorno"
+                   
                     onClick={() => alternarActivo(categoria)}
-                    className="rounded-full border border-crema-profundo px-3 py-1.5 text-xs font-medium text-tinta transition-colors hover:border-verde"
                   >
                     {categoria.activo ? 'Desactivar' : 'Activar'}
-                  </button>
+                  </BotonAdmin>
                   <button
                     type="button"
                     onClick={() => aplicarTono(categoria)}
@@ -134,13 +131,9 @@ export default function CategoriasIndex({ categorias }) {
                   >
                     Aplicar a todos
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => eliminar(categoria)}
-                    className="rounded-full border border-rojo-suave px-3 py-1.5 text-xs font-medium text-rojo transition-colors hover:bg-rojo-suave"
-                  >
+                  <BotonAdmin variante="peligro" onClick={() => eliminar(categoria)}>
                     Eliminar
-                  </button>
+                  </BotonAdmin>
                 </div>
               </li>
             ))}

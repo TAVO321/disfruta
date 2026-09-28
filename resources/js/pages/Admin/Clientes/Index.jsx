@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Head, router } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { fecha, precio } from '@/lib/config'
+import { BotonAdmin } from '@/components/BotonAdmin'
 
 export default function ClientesIndex({ clientes, filtros }) {
   const [q, setQ] = useState(filtros.q ?? '')
@@ -83,13 +84,9 @@ export default function ClientesIndex({ clientes, filtros }) {
                         >
                           Llamar
                         </a>
-                        <button
-                          type="button"
-                          onClick={() => eliminar(c)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-rojo hover:text-crema"
-                        >
-                          Eliminar
-                        </button>
+                  <BotonAdmin variante="peligro" onClick={() => eliminar(c)}>
+                    Eliminar
+                  </BotonAdmin>
                       </div>
                     </td>
                   </tr>

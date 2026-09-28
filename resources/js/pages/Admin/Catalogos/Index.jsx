@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { claseTono } from '@/lib/config'
+import { BotonAdmin } from '@/components/BotonAdmin'
 
 /**
  * Los cuatro catalogos comparten la misma forma, asi que se dibujan con el
@@ -113,14 +114,11 @@ function usosDe(clave, mapas) {
   }[clave] ?? {}
 }
 
+/** Los cuatro catalogos arrancan vacios; se usa para limpiar tras guardar. */
+const CAMPOS_VACIOS = { nombre: '', emoji: '', chilis: 0, descripcion: '', tono: 'dorado' }
+
 function Catalogo({ catalogo, usos }) {
-  const { data, setData, post, put, processing, errors, reset } = useForm({
-    nombre: '',
-    emoji: '',
-    chilis: 0,
-    descripcion: '',
-    tono: 'dorado',
-  })
+  const { data, setData, post, put, processing, errors, clearErrors, reset } = useForm(CAMPOS_VACIOS)
   const [editando, setEditando] = useState(null)
 
   const campos = CAMPOS[catalogo.clave] ?? []
@@ -128,7 +126,15 @@ function Catalogo({ catalogo, usos }) {
   const guardar = (e) => {
     e.preventDefault()
 
-    const cuerpo = Object.fromEntries(campos.map((c) => [c.clave, data[c.clave]]))
+    // useForm manda dataRef.current como payload y usa el segundo argumento
+    // solo para opciones de la visita: post(url, cuerpo, opciones) descarta
+    // las opciones en silencio y onSuccess nunca llega a correr.
+    setData(Object.fromEntries(campos.map((c) => [c.clave, data[c.clave]])))
+
+    // Los errores de una fila repetida se limpian en cada intento: si no,
+    // el mensaje queda pegado y hace pensar que el guardado no sirvio.
+    clearErrors()
+
     const opciones = {
       preserveScroll: true,
       onSuccess: () => {
@@ -138,9 +144,9 @@ function Catalogo({ catalogo, usos }) {
     }
 
     if (editando) {
-      put(`/admin/catalogos/${catalogo.clave}/${editando}`, cuerpo, opciones)
+      put(`/admin/catalogos/${catalogo.clave}/${editando}`, opciones)
     } else {
-      post(`/admin/catalogos/${catalogo.clave}`, cuerpo, opciones)
+      post(`/admin/catalogos/${catalogo.clave}`, opciones)
     }
   }
 
@@ -208,27 +214,15 @@ function Catalogo({ catalogo, usos }) {
 
                 <td className="py-2.5">
                   <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => editar(fila)}
-                      className="rounded-full border border-crema-profundo px-2.5 py-1 text-xs font-medium text-tinta transition-colors hover:border-verde"
-                    >
+                    <BotonAdmin variante="contorno" onClick={() => editar(fila)}>
                       Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => alternarActivo(fila)}
-                      className="rounded-full border border-crema-profundo px-2.5 py-1 text-xs font-medium text-tinta transition-colors hover:border-verde"
-                    >
+                    </BotonAdmin>
+                    <BotonAdmin variante="contorno" onClick={() => alternarActivo(fila)}>
                       {fila.activo ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => eliminar(fila)}
-                      className="rounded-full border border-rojo-suave px-2.5 py-1 text-xs font-medium text-rojo transition-colors hover:bg-rojo-suave"
-                    >
+                    </BotonAdmin>
+                    <BotonAdmin variante="peligro" onClick={() => eliminar(fila)}>
                       Eliminar
-                    </button>
+                    </BotonAdmin>
                   </div>
                 </td>
               </tr>

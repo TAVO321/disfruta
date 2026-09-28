@@ -6,6 +6,7 @@ import { Campo } from '@/components/Campo'
 import { IconoCarrito, IconoCerrar, IconoMenos, IconoMas, IconoWhatsapp } from '@/components/Iconos'
 import { precio } from '@/lib/config'
 import { linkWhatsApp, mensajeWhatsApp } from '@/lib/whatsapp'
+import { useEsDesktop } from '@/lib/useEsDesktop'
 import { useCarrito } from '@/context/Carrito'
 
 const CAMPOS_VACIOS = { nombre: '', telefono: '', zona: '', notas: '' }
@@ -13,6 +14,7 @@ const CAMPOS_VACIOS = { nombre: '', telefono: '', zona: '', notas: '' }
 export default function CarritoIndex() {
   const { items, total, cambiarCantidad, eliminar, vaciar } = useCarrito()
   const { ajustes } = usePage().props
+  const esDesktop = useEsDesktop()
   const whatsapp = ajustes?.whatsapp ?? ''
   const zonas = ajustes?.zonasEntrega ?? []
 
@@ -21,7 +23,27 @@ export default function CarritoIndex() {
 
   const vacio = items.length === 0
 
+  const mensaje = () =>
+    mensajeWhatsApp(
+      items.map((i) => ({ producto: i, cantidad: i.cantidad, reserva: i.reserva })),
+      total,
+      form,
+      whatsapp,
+    )
+
+  // En celular el pedido se manda por WhatsApp y no entra al sistema: la
+  // pantalla de confirmacion es un paso de escritorio y en el telefono solo
+  // tapaba el chat. En escritorio se mantiene el doble registro.
   const confirmar = () => {
+    if (!esDesktop) {
+      if (whatsapp) {
+        window.open(linkWhatsApp(mensaje(), whatsapp), '_blank', 'noopener')
+        vaciar()
+      }
+
+      return
+    }
+
     setEnviando(true)
 
     router.post(
@@ -45,13 +67,7 @@ export default function CarritoIndex() {
     )
 
     if (whatsapp) {
-      const texto = mensajeWhatsApp(
-        items.map((i) => ({ producto: i, cantidad: i.cantidad, reserva: i.reserva })),
-        total,
-        form,
-        whatsapp,
-      )
-      window.open(linkWhatsApp(texto, whatsapp), '_blank', 'noopener')
+      window.open(linkWhatsApp(mensaje(), whatsapp), '_blank', 'noopener')
     }
   }
 
@@ -238,11 +254,13 @@ export default function CarritoIndex() {
                 className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-full bg-verde px-6 py-3.5 text-sm font-semibold tracking-wide text-crema uppercase transition-colors hover:bg-verde-medio disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <IconoWhatsapp width={18} height={18} />
-                {enviando ? 'Guardando…' : 'Confirmar pedido'}
+                {enviando ? 'Guardando…' : esDesktop ? 'Confirmar pedido' : 'Pedir por WhatsApp'}
               </button>
 
               <p className="mt-2.5 text-center text-xs text-tinta-suave">
-                Sin pago online. Confirmamos disponibilidad, envío y forma de pago por WhatsApp.
+                {esDesktop
+                  ? 'Sin pago online. Confirmamos disponibilidad, envío y forma de pago por WhatsApp.'
+                  : 'Te escribimos por WhatsApp para confirmar disponibilidad, envío y forma de pago.'}
               </p>
             </div>
           </div>
