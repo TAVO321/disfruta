@@ -53,6 +53,36 @@ export default defineConfig({
             '@': path.resolve(import.meta.dirname, 'resources/js'),
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    const esNode = /node_modules[\\/]/.test(id)
+
+                    // React por un lado para que el entry y las paginas no lo repitan.
+                    if (esNode && /[\\/]node_modules[\\/](react|react-dom|scheduler)\b/.test(id)) {
+                        return 'vendor-react'
+                    }
+
+                    // Inertia y sus dependencias directas (router, cliente XHR, etc.)
+                    // viajan juntas porque casi toda la app las necesita.
+                    if (
+                        esNode &&
+                        (/[\\/]node_modules[\\/]@inertiajs\b/.test(id) ||
+                            /[\\/]node_modules[\\/](axios|history|nprogress|qs|deepmerge)\b/.test(id))
+                    ) {
+                        return 'vendor-inertia'
+                    }
+
+                    // Los iconos son muchos SVG; separarlos evita que contaminen
+                    // el chunk compartido y se cargan solo donde se usan.
+                    if (/resources[\\/]js[\\/]components[\\/]Iconos\.jsx$/.test(id)) {
+                        return 'icons'
+                    }
+                },
+            },
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

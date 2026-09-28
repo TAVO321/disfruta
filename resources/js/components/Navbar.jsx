@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { IconoCarrito, IconoCerrar, IconoMenu, IconoPanel } from '@/components/Iconos'
+import Logo from '@/components/Logo'
 import { MARCA, whatsappLegible } from '@/lib/config'
 import { useCarrito } from '@/context/Carrito'
 
@@ -45,13 +46,7 @@ export function Navbar({ onAbrirCarrito }) {
     >
       <div className="container-disfruta flex items-center justify-between py-4">
         <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="DISFRUTA, inicio" onClick={cerrado}>
-          <img
-            src="/images/logo.png"
-            alt="DISFRUTA"
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-xl object-contain"
-          />
+          <Logo className="h-10 w-10 rounded-xl" width={40} height={40} />
           <span className="font-serif text-xl font-bold tracking-[0.16em] text-verde">
             DISFRUTA
           </span>

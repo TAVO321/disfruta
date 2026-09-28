@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react'
 import { Link, router, usePage } from '@inertiajs/react'
 import { Flash } from '@/components/Flash'
+import Logo from '@/components/Logo'
 import {
   IconoCerrar,
   IconoEtiqueta,
@@ -95,13 +96,7 @@ export default function LayoutAdmin({ children }) {
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-crema-profundo bg-verde text-crema lg:flex">
           <div className="border-b border-crema/12 px-5 py-5">
             <Link href="/" className="flex items-center gap-2.5">
-              <img
-                src="/images/logo.png"
-                alt="DISFRUTA"
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-lg bg-crema object-contain p-0.5"
-              />
+              <Logo className="h-9 w-9 rounded-lg bg-crema p-0.5" width={36} height={36} />
               <span>
                 <span className="block font-serif text-base font-bold tracking-[0.14em]">DISFRUTA</span>
                 <span className="block text-[0.6rem] tracking-[0.15em] text-dorado-claro uppercase">

@@ -45,6 +45,7 @@ export function ImagenProducto({ producto, indice = 0, prioritario = false, clas
         alt={`${producto.nombre}${indice > 0 ? ` · foto ${indice + 1}` : ''}`}
         className={`h-full w-full object-cover ${className}`}
         loading={prioritario ? 'eager' : 'lazy'}
+        fetchPriority={prioritario ? 'high' : 'low'}
         decoding="async"
       />
     )
