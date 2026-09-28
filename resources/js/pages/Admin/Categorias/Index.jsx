@@ -120,7 +120,13 @@ export default function CategoriasIndex({ categorias }) {
             {categorias.map((categoria) => (
               <li key={categoria.id} className="flex flex-wrap items-center gap-4 py-4 first:pt-0 last:pb-0">
                 <div className="h-20 w-20 shrink-0">
-                  <IlustracionFrasco tono={categoria.tono} />
+                  <IlustracionFrasco
+                    producto={{
+                      id: categoria.id,
+                      nombre: categoria.nombre,
+                      tono: categoria.tono,
+                    }}
+                  />
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -188,7 +194,13 @@ export default function CategoriasIndex({ categorias }) {
 
               <div className="flex justify-center rounded-xl bg-crema p-3">
                 <div className="h-40 w-40">
-                  <IlustracionFrasco tono={data.tono} />
+                  <IlustracionFrasco
+                    producto={{
+                      id: editando ?? 'nuevo',
+                      nombre: data.nombre,
+                      tono: data.tono,
+                    }}
+                  />
                 </div>
               </div>
 
