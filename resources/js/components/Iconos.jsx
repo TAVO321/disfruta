@@ -80,9 +80,9 @@ export const IconoFuego = (p) => (
 
 export const IconoChili = ({ lleno, ...p }) => (
   <svg
+    {...base(p)}
     fill={lleno ? '#B23434' : 'none'}
     stroke={lleno ? '#B23434' : '#D9CFBB'}
-    {...base(p)}
   >
     <path d={PATH_CHILI} />
   </svg>

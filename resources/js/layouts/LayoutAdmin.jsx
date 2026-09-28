@@ -22,7 +22,7 @@ const SECCIONES = [
 
 const SECCIONES_SISTEMA = [
   { ruta: '/admin/categorias', texto: 'Familias', icono: IconoEtiqueta },
-  { ruta: '/admin/catalogos', texto: 'CatÃ¡logos', icono: IconoEtiqueta },
+  { ruta: '/admin/catalogos', texto: 'Catálogos', icono: IconoEtiqueta },
   { ruta: '/admin/usuarios', texto: 'Administradores', icono: IconoUsuarioGrupo },
   { ruta: '/admin/ajustes', texto: 'Ajustes', icono: IconoEtiqueta },
 ]
@@ -87,7 +87,7 @@ export default function LayoutAdmin({ children }) {
     <div className="min-h-screen bg-crema-oscuro/50">
       {auth?.user && (
         <div className="bg-verde px-4 py-1.5 text-center text-[0.7rem] text-crema/80">
-          SesiÃ³n de {auth.user.email}
+          Sesión de {auth.user.email}
         </div>
       )}
 
@@ -131,7 +131,7 @@ export default function LayoutAdmin({ children }) {
               onClick={salir}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold tracking-wide text-crema/55 uppercase transition-colors hover:bg-crema/10 hover:text-dorado-claro"
             >
-              Cerrar sesiÃ³n
+              Cerrar sesión
             </button>
           </div>
         </aside>
@@ -142,7 +142,7 @@ export default function LayoutAdmin({ children }) {
               type="button"
               onClick={() => setAbierto(true)}
               className="rounded-full p-2 text-verde"
-              aria-label="Abrir menÃº del panel"
+              aria-label="Abrir menú del panel"
             >
               <IconoMenu />
             </button>
@@ -161,7 +161,7 @@ export default function LayoutAdmin({ children }) {
         <div className="fixed inset-0 z-60 lg:hidden">
           <button
             type="button"
-            aria-label="Cerrar menÃº"
+            aria-label="Cerrar menú"
             onClick={() => setAbierto(false)}
             className="animar-aparece absolute inset-0 bg-tinta/50"
           />
@@ -201,7 +201,7 @@ export default function LayoutAdmin({ children }) {
                 onClick={salir}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold tracking-wide text-crema/55 uppercase transition-colors hover:bg-crema/10 hover:text-dorado-claro"
               >
-                Cerrar sesiÃ³n
+                Cerrar sesión
               </button>
             </div>
           </nav>

@@ -15,7 +15,7 @@
 --    3. Cargar los datos con los seeders, que es lo recomendado:
 --         php artisan db:seed --class=Database\Seeders\ProductionSeeder --force
 --       Si queres la mercaderia de ejemplo en vez de solo el sitio andamiaje,
---       usÃ¡ DatabaseSeeder.
+--       usá DatabaseSeeder.
 --
 --  UN DETALLE IMPORTANTE
 --    Este archivo NO incluye datos de negocio, pero si las filas de la tabla

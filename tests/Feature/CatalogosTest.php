@@ -294,6 +294,45 @@ class CatalogosTest extends TestCase
         $this->assertCount(12, $platos['filas']);
     }
 
+    /**
+     * El panel recorre `catalogos` y `filas` con `.map()`, asi que tienen que
+     * llegar como listas de JSON. Con las claves del catalogo, `collect()->map()`
+     * las conservaba y la prop salia como objeto: la pagina daba 200 y se caia
+     * en el navegador con "e.map is not a function".
+     */
+    public function test_los_catalogos_y_sus_filas_llegan_como_listas(): void
+    {
+        $this->actingAs($this->admin);
+
+        $props = $this->pagina($this->get('/admin/catalogos'))['props'];
+
+        $this->assertSame(range(0, count($props['catalogos']) - 1), array_keys($props['catalogos']));
+
+        foreach ($props['catalogos'] as $catalogo) {
+            $this->assertIsArray($catalogo['filas'], "Las filas de {$catalogo['clave']} no son una lista");
+            $this->assertSame(range(0, count($catalogo['filas']) - 1), array_keys($catalogo['filas']));
+        }
+    }
+
+    /**
+     * El filtro de estados y el select del panel los indexan por `id`, asi que
+     * cada estado tiene que venir con `id` y `nombre`.
+     */
+    public function test_los_estados_del_panel_llegan_como_lista_con_id_y_nombre(): void
+    {
+        $this->actingAs($this->admin);
+
+        $estados = $this->pagina($this->get('/admin/pedidos'))['props']['estados'];
+
+        $this->assertSame(range(0, count($estados) - 1), array_keys($estados));
+        $this->assertNotEmpty($estados);
+
+        foreach ($estados as $estado) {
+            $this->assertIsString($estado['id']);
+            $this->assertIsString($estado['nombre']);
+        }
+    }
+
     public function test_una_instalacion_nueva_deja_todas_las_familias_con_paleta(): void
     {
         // La migracion del tono corre antes que los seeders, asi que sin esto

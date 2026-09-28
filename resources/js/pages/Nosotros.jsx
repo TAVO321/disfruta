@@ -157,7 +157,7 @@ export default function Nosotros() {
                   className={`rounded-2xl border border-crema-profundo p-6 text-center shadow-suave ${x.fondo}`}
                 >
                   <p className={`font-serif text-3xl font-bold ${x.texto}`}>{x.n}</p>
-                  <p className="mt-1 text-xs tracking-wide uppercase opacity-80">{x.t}</p>
+                  <p className={`mt-1 text-xs tracking-wide uppercase ${x.texto}`}>{x.t}</p>
                 </div>
               ))}
             </div>

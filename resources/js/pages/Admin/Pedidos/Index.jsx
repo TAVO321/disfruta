@@ -80,16 +80,18 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
           </button>
           {estados.map((e) => (
             <button
-              key={e}
+              key={e.id}
               type="button"
-              onClick={() => ir({ q: q || undefined, estado: filtros.estado === e ? undefined : e })}
+              onClick={() =>
+                ir({ q: q || undefined, estado: filtros.estado === e.id ? undefined : e.id })
+              }
               className={`rounded-full border px-3.5 py-2 text-xs font-semibold ${
-                filtros.estado === e
+                filtros.estado === e.id
                   ? 'border-verde bg-verde text-crema'
                   : 'border-crema-profundo bg-white text-tinta hover:border-verde'
               }`}
             >
-              {nombreEstado[e] ?? e}
+              {e.nombre}
             </button>
           ))}
         </div>
@@ -178,8 +180,8 @@ export default function PedidosIndex({ pedidos, estados, filtros }) {
                           className="w-full rounded-lg border border-crema-profundo bg-crema px-3.5 py-2.5 text-sm sm:w-auto"
                         >
                           {estados.map((e) => (
-                            <option key={e} value={e}>
-                              {nombreEstado[e] ?? e}
+                            <option key={e.id} value={e.id}>
+                              {e.nombre}
                             </option>
                           ))}
                         </select>

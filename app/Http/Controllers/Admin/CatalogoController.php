@@ -82,6 +82,7 @@ class CatalogoController extends Controller
                     'etiqueta' => $config['etiqueta'],
                     'filas' => $config['modelo']::query()->orderBy('orden')->get(),
                 ])
+                ->values()
                 ->all(),
             'productosPorPlato' => $this->productosPorPlato(),
             'productosPorNivel' => $this->productosPorNivel(),
