@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Head, router, useForm } from '@inertiajs/react'
 import { TarjetaAdmin } from '@/layouts/LayoutAdmin'
 import { IlustracionFrasco } from '@/components/FrascoIlustrado'
@@ -23,6 +23,7 @@ export default function CategoriasIndex({ categorias }) {
   const { confirmar } = useConfirmacion()
   const { data, setData, post, put, processing, errors, reset } = useForm(CAMPOS_VACIOS)
   const [editando, setEditando] = useState(null)
+  const formRef = useRef(null)
 
   const guardar = (e) => {
     e.preventDefault()
@@ -30,7 +31,7 @@ export default function CategoriasIndex({ categorias }) {
     const opciones = {
       preserveScroll: true,
       onSuccess: () => {
-        reset(CAMPOS_VACIOS)
+        reset()
         setEditando(null)
       },
     }
@@ -44,17 +45,22 @@ export default function CategoriasIndex({ categorias }) {
 
   const editar = (categoria) => {
     setEditando(categoria.id)
-    reset({
+    setData({
       nombre: categoria.nombre,
       descripcion: categoria.descripcion ?? '',
       tono: categoria.tono,
       activo: categoria.activo,
     })
+
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      formRef.current?.querySelector('input')?.focus()
+    })
   }
 
   const cancelar = () => {
     setEditando(null)
-    reset(CAMPOS_VACIOS)
+    reset()
   }
 
   const alternarActivo = (categoria) =>
@@ -156,7 +162,7 @@ export default function CategoriasIndex({ categorias }) {
         </TarjetaAdmin>
 
         <TarjetaAdmin titulo={editando ? 'Editar familia' : 'Nueva familia'}>
-          <form onSubmit={guardar} className="space-y-4">
+          <form ref={formRef} onSubmit={guardar} className="space-y-4">
             <Campo label="Nombre" error={errors.nombre}>
               <input
                 value={data.nombre}
